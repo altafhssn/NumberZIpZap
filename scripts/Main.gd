@@ -20,7 +20,7 @@ var current_level: int = 1
 var levels_per_pack: int = 40
 var current_pack: int = 0  # 0=Tutorial, 1=Sunrise, 2=Nebula, etc.
 var grid_sizes = [5, 5, 6, 7, 8, 9, 9]
-var dot_counts = [4, 5, 6, 7, 8, 10, 12]
+var dot_counts = [6, 6, 7, 8, 9, 10, 12]
 
 func _ready():
 	level_gen = LevelGeneratorScript.new()

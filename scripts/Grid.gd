@@ -285,17 +285,20 @@ func _draw_grid_background():
 	_draw_round_rect(shadow, grid_radius + 4.0, Color(0, 0, 0, 0.35))
 	_draw_round_rect(grid_rect, grid_radius, grid_bg)
 
-	# Empty cell tiles (rounded), skip cells already on the path
+	# Cell tiles: empty cells get the base tone; cells the line has passed
+	# through are filled with a shade-darker version of their path color.
 	var inset = padding + 1.0
 	var cr = maxf(4.0, cell_size * 0.16)
 	for r in range(grid_size):
 		for c in range(grid_size):
-			if cells.has("%d,%d" % [r, c]):
-				continue
+			var key = "%d,%d" % [r, c]
 			var x = grid_rect.position.x + c * cell_size + inset
 			var y = grid_rect.position.y + r * cell_size + inset
 			var w = cell_size - inset * 2
-			_draw_round_rect(Rect2(x, y, w, w), cr, cell_empty)
+			var tile_col = cell_empty
+			if cells.has(key):
+				tile_col = (cells[key]["fill_color"] as Color).darkened(0.5)
+			_draw_round_rect(Rect2(x, y, w, w), cr, tile_col)
 
 func _draw_path():
 	if path_cells.size() == 0:

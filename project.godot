@@ -19,6 +19,7 @@ config/icon="res://assets/ui/icon.png"
 [autoload]
 
 GameData="*res://scripts/GameData.gd"
+Ads="*res://scripts/Ads.gd"
 Music="*res://scripts/Music.gd"
 Ui="*res://scripts/Ui.gd"
 Transition="*res://scripts/Transition.gd"

@@ -13,6 +13,7 @@ const PACK_NAMES := ["Tutorial", "Sunrise", "Nebula", "Void", "Nova", "Singulari
 var _pack := 0
 
 func _ready():
+	Ads.show_banner()
 	back_btn.pressed.connect(func(): Transition.goto("res://scenes/Home.tscn"))
 	prev_btn.pressed.connect(func(): _change_pack(-1))
 	next_btn.pressed.connect(func(): _change_pack(1))

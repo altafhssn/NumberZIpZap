@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var hint_btn = $HintBtn
 @onready var hint_count = $HintCount
 @onready var pause_btn = $PauseBtn
+@onready var continue_btn = $ContinueBtn
 @onready var complete_panel = $CompletePanel
 @onready var stars_label = $CompletePanel/StarsLabel
 @onready var stats_label = $CompletePanel/StatsLabel
@@ -21,6 +22,7 @@ extends CanvasLayer
 
 func _ready():
 	complete_panel.visible = false
+	continue_btn.visible = false
 	_connect_buttons()
 
 func _connect_buttons():
@@ -31,6 +33,17 @@ func _connect_buttons():
 	replay_btn.pressed.connect(_on_replay_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
 	pause_btn.pressed.connect(_on_pause_pressed)
+	continue_btn.pressed.connect(_on_continue_pressed)
+
+func _on_continue_pressed():
+	if main:
+		main.on_watch_continue()
+
+func show_continue():
+	continue_btn.visible = true
+
+func hide_continue():
+	continue_btn.visible = false
 
 func _on_replay_pressed():
 	complete_panel.visible = false
@@ -46,6 +59,7 @@ func update_for_level(level_num: int, level_data: Dictionary):
 	var diff = level_data.get("difficulty", 0)
 	var pack_name = _get_pack_name(level_num)
 	
+	continue_btn.visible = false
 	level_label.text = "%s – Level %d" % [pack_name, level_num]
 	fill_label.text = "Connect 1→%d · fill every cell" % level_data.get("dots", []).size()
 	
@@ -54,6 +68,7 @@ func update_for_level(level_num: int, level_data: Dictionary):
 		hint_count.text = "💡 %d" % main.game_state.hints_used
 
 func update_stats(state):
+	continue_btn.visible = false
 	var fill_pct = int(state.get_fill_pct())
 	var next_dot = state.get_next_dot_number()
 
@@ -71,6 +86,7 @@ func update_stats(state):
 func show_fail(message: String):
 	fill_label.text = "%s — Undo or Reset" % message
 	fill_label.add_theme_color_override("font_color", Color(0.94, 0.27, 0.27, 1))
+	continue_btn.visible = true
 
 func show_complete(stars: int, time_sec: float, moves: int):
 	complete_panel.visible = true

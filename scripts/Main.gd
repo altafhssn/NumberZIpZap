@@ -32,6 +32,9 @@ func _ready():
 	audio = AudioScript.new()
 	add_child(audio)
 
+	# No banner during gameplay (avoid misclicks)
+	Ads.hide_banner()
+
 	# Resume from the level chosen on Home / Level Select
 	current_level = maxi(1, GameData.selected_level)
 	current_pack = mini((current_level - 1) / levels_per_pack, grid_sizes.size() - 1)
@@ -125,11 +128,23 @@ func on_reset():
 	_haptic(18)
 
 func on_hint():
+	# Hint is gated behind a rewarded ad (stub grants immediately)
+	Ads.show_rewarded("hint", _grant_hint)
+
+func _grant_hint():
 	var hint = game_state.get_hint()
 	if hint.size() == 2:
 		grid.show_hint(hint[0], hint[1])
 		hud.update_stats(game_state)
 		_haptic(12)
+
+func on_watch_continue():
+	# Rewarded retry of the same level after a fail
+	Ads.show_rewarded("continue", _continue_reward)
+
+func _continue_reward():
+	hud.hide_continue()
+	on_replay()
 
 func _on_level_complete():
 	var stars = game_state.get_stars()
@@ -143,6 +158,9 @@ func _on_level_complete():
 	hud.show_complete(stars, time_val, moves_val)
 
 func on_next_level():
+	# Interstitial every Nth completion (no-op in stub mode)
+	Ads.notify_level_complete_then_interstitial()
+
 	current_level += 1
 	# Check if we move to next pack
 	if (current_level - 1) % levels_per_pack == 0 and current_level > 1:

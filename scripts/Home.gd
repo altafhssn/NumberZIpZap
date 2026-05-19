@@ -9,6 +9,7 @@ const SettingsScene = preload("res://scenes/Settings.tscn")
 @onready var progress_label: Label = $ProgressLabel
 
 func _ready():
+	Ads.show_banner()
 	play_btn.pressed.connect(_on_play)
 	levels_btn.pressed.connect(_on_levels)
 	settings_btn.pressed.connect(_on_settings)

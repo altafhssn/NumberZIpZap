@@ -42,12 +42,12 @@ func _make_music() -> AudioStreamWAV:
 		[440.0, 0.07, 0.13, 0.8],
 		[554.37, 0.05, 0.17, 0.9],
 	]
-	var snapped := []
+	var tuned := []
 	var norm := 0.0
 	for p in partials:
 		var f: float = maxf(base, round(p[0] / base) * base)
 		var lf: float = maxf(base, round(p[2] / base) * base)
-		snapped.append([f, p[1], lf, p[3]])
+		tuned.append([f, p[1], lf, p[3]])
 		norm += p[1]
 
 	var data := PackedByteArray()
@@ -55,7 +55,7 @@ func _make_music() -> AudioStreamWAV:
 	for i in range(count):
 		var t := float(i) / float(RATE)
 		var s := 0.0
-		for p in snapped:
+		for p in tuned:
 			var depth: float = p[3]
 			var lfo: float = 0.5 * (1.0 + sin(TAU * p[2] * t))
 			var amp: float = p[1] * ((1.0 - depth) + depth * lfo)

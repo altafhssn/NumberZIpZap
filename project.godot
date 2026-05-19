@@ -13,7 +13,7 @@ config_version=5
 config/name="ZipPath"
 config/description="Connect the dots, fill the grid."
 run/main_scene="res://scenes/Home.tscn"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/ui/icon.png"
 
 [autoload]
@@ -30,9 +30,18 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/size/min_width=360
 window/size/min_height=640
+window/size/resizable=false
 window/dpi/allow_hidpi=true
+window/handheld/orientation="portrait"
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+pointing/emulate_mouse_from_touch=true
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0.043, 0.043, 0.086, 1)

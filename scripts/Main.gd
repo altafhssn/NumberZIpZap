@@ -147,6 +147,13 @@ func on_next_level():
 	GameData.selected_level = current_level
 	_start_new_level()
 
+func on_replay():
+	# Replay the exact same puzzle from scratch
+	game_state.full_reset()
+	grid.refresh_from_state(game_state)
+	hud.update_for_level(current_level, game_state.level_data)
+	hud.update_stats(game_state)
+
 func on_pause():
 	if has_node("Pause"):
 		return

@@ -16,6 +16,7 @@ extends CanvasLayer
 @onready var stars_label = $CompletePanel/StarsLabel
 @onready var stats_label = $CompletePanel/StatsLabel
 @onready var next_btn = $CompletePanel/NextBtn
+@onready var replay_btn = $CompletePanel/ReplayBtn
 @onready var home_btn = $CompletePanel/HomeBtn
 
 func _ready():
@@ -27,8 +28,14 @@ func _connect_buttons():
 	reset_btn.pressed.connect(_on_reset_pressed)
 	hint_btn.pressed.connect(_on_hint_pressed)
 	next_btn.pressed.connect(_on_next_pressed)
+	replay_btn.pressed.connect(_on_replay_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
 	pause_btn.pressed.connect(_on_pause_pressed)
+
+func _on_replay_pressed():
+	complete_panel.visible = false
+	if main:
+		main.on_replay()
 
 func _on_pause_pressed():
 	if main:

@@ -182,9 +182,9 @@ vertical_alignment = 1
 [node name="CompletePanel" type="Panel" parent="HUD"]
 visible = false
 offset_left = 40.0
-offset_top = 250.0
+offset_top = 230.0
 offset_right = 440.0
-offset_bottom = 560.0
+offset_bottom = 590.0
 theme_override_styles/panel = SubResource("panel_complete")
 
 [node name="TitleLabel" type="Label" parent="HUD/CompletePanel"]
@@ -219,9 +219,9 @@ horizontal_alignment = 1
 
 [node name="NextBtn" type="Button" parent="HUD/CompletePanel"]
 offset_left = 50.0
-offset_top = 192.0
+offset_top = 184.0
 offset_right = 350.0
-offset_bottom = 244.0
+offset_bottom = 232.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("btn_accent")
@@ -230,11 +230,24 @@ theme_override_styles/pressed = SubResource("btn_accent")
 theme_override_styles/focus = SubResource("btn_accent")
 text = "▶  Next Level"
 
+[node name="ReplayBtn" type="Button" parent="HUD/CompletePanel"]
+offset_left = 50.0
+offset_top = 242.0
+offset_right = 350.0
+offset_bottom = 290.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "⟳  Replay Level"
+
 [node name="HomeBtn" type="Button" parent="HUD/CompletePanel"]
 offset_left = 120.0
-offset_top = 256.0
+offset_top = 304.0
 offset_right = 280.0
-offset_bottom = 294.0
+offset_bottom = 342.0
 theme_override_colors/font_color = Color(0.55, 0.58, 0.78, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("btn_normal")

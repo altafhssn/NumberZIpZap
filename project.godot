@@ -31,3 +31,4 @@ window/dpi/allow_hidpi=true
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.043, 0.043, 0.086, 1)

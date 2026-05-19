@@ -26,9 +26,11 @@ var error_timer: float = 0.0
 var error_message: String = ""
 
 # Colors
-var bg_color = Color("#0D0D1A")
-var grid_bg = Color("#1A1A2E")
+var bg_color = Color("#0B0B16")
+var bg_color_bottom = Color("#13132A")
+var grid_bg = Color("#16162C")
 var grid_border = Color("#2A2A4E")
+var cell_empty = Color("#1C1C38")
 var dot_fill = Color("#000000")
 var dot_text = Color("#FFFFFF")
 var path_start: Color = Color("#4361EE")
@@ -36,6 +38,9 @@ var path_end: Color = Color("#7B2D8B")
 var hint_color = Color("#FFD166")
 var error_color = Color("#EF4444")
 var complete_flash = Color("#FFFFFF")
+
+# Layout
+var grid_radius: float = 18.0
 
 # Touch tracking
 var is_dragging: bool = false
@@ -66,7 +71,7 @@ func setup(level_data: Dictionary):
 	# Center the grid
 	var total_size = cell_size * grid_size
 	var offset_x = (screen_size.x - total_size) / 2.0
-	var offset_y = (screen_size.y * 0.25)  # Below top UI area
+	var offset_y = (screen_size.y * 0.19)  # Below top UI area
 	grid_rect = Rect2(offset_x, offset_y, total_size, total_size)
 	
 	position = Vector2(0, 0)
@@ -200,63 +205,102 @@ func start_completion_animation():
 func _draw():
 	if grid_size <= 0 or cell_size <= 0:
 		return
+	_draw_background()
 	_draw_grid_background()
 	_draw_path()
 	_draw_hint()
 	_draw_errors()
 	_draw_dots()
 
+func _draw_round_rect(rect: Rect2, radius: float, color: Color, width: float = -1.0):
+	radius = minf(radius, minf(rect.size.x, rect.size.y) / 2.0)
+	if width >= 0.0:
+		# Outline only
+		var pts := PackedVector2Array()
+		var corners = [
+			[Vector2(rect.position.x + radius, rect.position.y + radius), 180, 270],
+			[Vector2(rect.end.x - radius, rect.position.y + radius), 270, 360],
+			[Vector2(rect.end.x - radius, rect.end.y - radius), 0, 90],
+			[Vector2(rect.position.x + radius, rect.end.y - radius), 90, 180],
+		]
+		for cdef in corners:
+			for a in range(int(cdef[1]), int(cdef[2]) + 1, 9):
+				pts.append(cdef[0] + Vector2(cos(deg_to_rad(a)), sin(deg_to_rad(a))) * radius)
+		pts.append(pts[0])
+		draw_polyline(pts, color, width, true)
+		return
+	# Filled
+	draw_rect(Rect2(rect.position.x + radius, rect.position.y, rect.size.x - 2 * radius, rect.size.y), color)
+	draw_rect(Rect2(rect.position.x, rect.position.y + radius, rect.size.x, rect.size.y - 2 * radius), color)
+	draw_circle(Vector2(rect.position.x + radius, rect.position.y + radius), radius, color)
+	draw_circle(Vector2(rect.end.x - radius, rect.position.y + radius), radius, color)
+	draw_circle(Vector2(rect.position.x + radius, rect.end.y - radius), radius, color)
+	draw_circle(Vector2(rect.end.x - radius, rect.end.y - radius), radius, color)
+
+func _draw_background():
+	var vp = get_viewport_rect().size
+	var verts = PackedVector2Array([
+		Vector2(0, 0), Vector2(vp.x, 0), Vector2(vp.x, vp.y), Vector2(0, vp.y)
+	])
+	var cols = PackedColorArray([bg_color, bg_color, bg_color_bottom, bg_color_bottom])
+	draw_polygon(verts, cols)
+
 func _draw_grid_background():
-	# Draw grid background
-	draw_rect(grid_rect, grid_bg)
-	
-	# Draw cell borders
+	# Soft drop shadow + rounded panel
+	var shadow = grid_rect.grow(6.0)
+	_draw_round_rect(shadow, grid_radius + 4.0, Color(0, 0, 0, 0.35))
+	_draw_round_rect(grid_rect, grid_radius, grid_bg)
+
+	# Empty cell tiles (rounded), skip cells already on the path
+	var inset = padding + 1.0
+	var cr = maxf(4.0, cell_size * 0.16)
 	for r in range(grid_size):
 		for c in range(grid_size):
-			var x = grid_rect.position.x + c * cell_size
-			var y = grid_rect.position.y + r * cell_size
-			var cell_rect = Rect2(x, y, cell_size, cell_size)
-			draw_rect(cell_rect, grid_border, false, 1.0)
-	
-	# Draw empty cell backgrounds
-	for r in range(grid_size):
-		for c in range(grid_size):
-			var key = "%d,%d" % [r, c]
-			if not cells.has(key):
-				var x = grid_rect.position.x + c * cell_size + padding
-				var y = grid_rect.position.y + r * cell_size + padding
-				var w = cell_size - padding * 2
-				var inner_rect = Rect2(x, y, w, w)
-				draw_rect(inner_rect, Color("#151530"))
+			if cells.has("%d,%d" % [r, c]):
+				continue
+			var x = grid_rect.position.x + c * cell_size + inset
+			var y = grid_rect.position.y + r * cell_size + inset
+			var w = cell_size - inset * 2
+			_draw_round_rect(Rect2(x, y, w, w), cr, cell_empty)
 
 func _draw_path():
-	for r in range(grid_size):
-		for c in range(grid_size):
-			var key = "%d,%d" % [r, c]
-			if cells.has(key):
-				var x = grid_rect.position.x + c * cell_size + padding
-				var y = grid_rect.position.y + r * cell_size + padding
-				var w = cell_size - padding * 2
-				var color = cells[key]["fill_color"]
-				
-				if is_completing:
-					# Flash effect on completion
-					var flash = complete_flash.lerp(color, 1.0 - completion_progress)
-					draw_rect(Rect2(x, y, w, w), flash)
-				else:
-					draw_rect(Rect2(x, y, w, w), color)
-	
-	# Draw connection lines between path cells
-	if path_cells.size() >= 2:
+	if path_cells.size() == 0:
+		return
+
+	var w := maxf(6.0, cell_size * 0.34)
+
+	# Glow underlay
+	if not is_completing and path_cells.size() >= 2:
 		for i in range(path_cells.size() - 1):
-			var c1 = path_cells[i]
-			var c2 = path_cells[i + 1]
-			var p1 = _cell_center(c1[0], c1[1])
-			var p2 = _cell_center(c2[0], c2[1])
-			var progress = float(i) / float(maxi(1, path_cells.size()))
-			var line_color = path_start.lerp(path_end, progress)
-			line_color.a = 0.9
-			draw_line(p1, p2, line_color, 3.0, true)
+			var g1 = _cell_center(path_cells[i][0], path_cells[i][1])
+			var g2 = _cell_center(path_cells[i + 1][0], path_cells[i + 1][1])
+			var gc = path_start.lerp(path_end, float(i) / float(maxi(1, path_cells.size())))
+			gc.a = 0.18
+			draw_line(g1, g2, gc, w * 1.7, true)
+
+	# Rounded ribbon: caps at every node + thick segments
+	for i in range(path_cells.size()):
+		var cell = path_cells[i]
+		var center = _cell_center(cell[0], cell[1])
+		var prog = float(i) / float(maxi(1, path_cells.size()))
+		var node_col = path_start.lerp(path_end, prog)
+		if is_completing:
+			node_col = complete_flash.lerp(node_col, 1.0 - completion_progress)
+		draw_circle(center, w / 2.0, node_col)
+		if i < path_cells.size() - 1:
+			var nxt = _cell_center(path_cells[i + 1][0], path_cells[i + 1][1])
+			var seg_col = path_start.lerp(path_end, prog)
+			if is_completing:
+				seg_col = complete_flash.lerp(seg_col, 1.0 - completion_progress)
+			draw_line(center, nxt, seg_col, w, true)
+
+	# Bright head marker
+	if not is_completing:
+		var head = _cell_center(path_cells[-1][0], path_cells[-1][1])
+		var hc = path_end
+		hc.a = 0.5
+		draw_circle(head, w * 0.62, hc)
+		draw_circle(head, w * 0.34, Color("#FFFFFF"))
 
 func _draw_dots():
 	for r in range(grid_size):
@@ -276,27 +320,38 @@ func _draw_dots():
 						is_next = true
 				
 				# Dot circle - white fill with dark number for visibility
-				var radius = dot_radius
+				var radius = maxf(dot_radius, cell_size * 0.26)
 				if is_next and not is_reached:
 					# Pulsing next dot
-					var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.005) * 0.1
+					var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.005) * 0.12
 					radius *= pulse
-				
-				# Outer glow
-				draw_circle(center, radius + 3, Color("#4361EE").darkened(0.6))
+
+				var accent = path_start
+
+				# Pulsing attention ring for the next target dot
+				if is_next and not is_reached:
+					var ring = 0.35 + sin(Time.get_ticks_msec() * 0.006) * 0.25
+					var ring_col = accent
+					ring_col.a = ring
+					draw_circle(center, radius + 7, ring_col)
+
+				# Soft glow
+				var glow = accent
+				glow.a = 0.45
+				draw_circle(center, radius + 4, glow)
 				# White fill
 				draw_circle(center, radius, Color("#FFFFFF"))
 				# Accent border
-				draw_circle(center, radius, Color("#4361EE"), 2.0)
-				
+				draw_circle(center, radius, accent, false, 2.5, true)
+
 				# Dot number in dark for contrast on white
-				var font_size = clampi(int(radius * 1.1), 10, 18)
+				var font_size = clampi(int(radius * 1.0), 11, 22)
 				var font = ThemeDB.fallback_font
 				var font_size_dp = font_size
 				var text = str(dot_num)
 				var text_size = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_dp)
-				var text_pos = center - text_size / 2.0
-				draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_dp, Color("#0D0D1A"))
+				var text_pos = center - text_size / 2.0 + Vector2(0, text_size.y * 0.32)
+				draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_dp, accent.darkened(0.45))
 
 func _draw_hint():
 	if hint_cell.x >= 0:
@@ -306,16 +361,16 @@ func _draw_hint():
 		var alpha = 0.4 + sin(Time.get_ticks_msec() * 0.008) * 0.3
 		var color = hint_color
 		color.a = alpha
-		draw_circle(center, cell_size * 0.35, color)
-		
-		# Hint dashed border
+		draw_circle(center, cell_size * 0.32, color)
+
+		# Hint highlight border
 		var rect = Rect2(
-			grid_rect.position.x + c * cell_size + 2,
-			grid_rect.position.y + r * cell_size + 2,
-			cell_size - 4,
-			cell_size - 4
+			grid_rect.position.x + c * cell_size + 4,
+			grid_rect.position.y + r * cell_size + 4,
+			cell_size - 8,
+			cell_size - 8
 		)
-		draw_rect(rect, hint_color, false, 2.0)
+		_draw_round_rect(rect, cell_size * 0.16, hint_color, 2.5)
 
 func _draw_errors():
 	if error_cell.x >= 0:

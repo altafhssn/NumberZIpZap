@@ -319,39 +319,44 @@ func _draw_dots():
 					if main.game_state.get_next_dot_number() == dot_num:
 						is_next = true
 				
-				# Dot circle - white fill with dark number for visibility
-				var radius = maxf(dot_radius, cell_size * 0.26)
+				var radius = maxf(dot_radius, cell_size * 0.32)
 				if is_next and not is_reached:
 					# Pulsing next dot
-					var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.005) * 0.12
+					var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.005) * 0.10
 					radius *= pulse
 
 				var accent = path_start
 
 				# Pulsing attention ring for the next target dot
 				if is_next and not is_reached:
-					var ring = 0.35 + sin(Time.get_ticks_msec() * 0.006) * 0.25
+					var ring = 0.30 + sin(Time.get_ticks_msec() * 0.006) * 0.22
 					var ring_col = accent
 					ring_col.a = ring
-					draw_circle(center, radius + 7, ring_col)
+					draw_circle(center, radius + 8, ring_col)
 
 				# Soft glow
 				var glow = accent
-				glow.a = 0.45
-				draw_circle(center, radius + 4, glow)
-				# White fill
-				draw_circle(center, radius, Color("#FFFFFF"))
-				# Accent border
-				draw_circle(center, radius, accent, false, 2.5, true)
+				glow.a = 0.40
+				draw_circle(center, radius + 5, glow)
+				# Filled accent disc (reached dots get a brighter core)
+				var disc = accent if not is_reached else accent.lightened(0.15)
+				draw_circle(center, radius, disc)
+				# Crisp white ring
+				draw_circle(center, radius, Color("#FFFFFF"), false, maxf(2.0, radius * 0.12), true)
 
-				# Dot number in dark for contrast on white
-				var font_size = clampi(int(radius * 1.0), 11, 22)
+				# Dot number — white, properly centered, faux-bold
 				var font = ThemeDB.fallback_font
-				var font_size_dp = font_size
+				var fs = clampi(int(radius * 1.15), 14, 30)
 				var text = str(dot_num)
-				var text_size = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_dp)
-				var text_pos = center - text_size / 2.0 + Vector2(0, text_size.y * 0.32)
-				draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_dp, accent.darkened(0.45))
+				var tw = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+				var ascent = font.get_ascent(fs)
+				var descent = font.get_descent(fs)
+				var baseline_y = center.y + (ascent - descent) / 2.0
+				var tx = center.x - tw / 2.0
+				var num_col = Color("#FFFFFF")
+				for off in [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]:
+					draw_string(font, Vector2(tx, baseline_y) + off, text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, num_col)
+				draw_string(font, Vector2(tx, baseline_y), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, num_col)
 
 func _draw_hint():
 	if hint_cell.x >= 0:

@@ -33,17 +33,25 @@ func update_for_level(level_num: int, level_data: Dictionary):
 	var diff = level_data.get("difficulty", 0)
 	var pack_name = _get_pack_name(level_num)
 	
-	level_label.text = "%s – Level %d (Diff: %.0f)" % [pack_name, level_num, diff]
-	fill_label.text = "0% filled"
+	level_label.text = "%s – Level %d" % [pack_name, level_num]
+	fill_label.text = "Connect 1→%d · fill every cell" % level_data.get("dots", []).size()
 	
 	# Update hint count
 	if main and main.game_state:
 		hint_count.text = "💡 %d" % main.game_state.hints_used
 
 func update_stats(state):
-	var fill_pct = state.get_fill_pct()
-	fill_label.text = "%d%% filled" % int(fill_pct)
-	
+	var fill_pct = int(state.get_fill_pct())
+	var next_dot = state.get_next_dot_number()
+
+	if next_dot == -1 and fill_pct < 100:
+		# All dots linked but grid not full — this is the common confusion point
+		fill_label.text = "All dots linked — now fill the rest! (%d%%)" % fill_pct
+		fill_label.add_theme_color_override("font_color", Color(1, 0.82, 0.4, 1))
+	else:
+		fill_label.text = "%d%% filled" % fill_pct
+		fill_label.add_theme_color_override("font_color", Color(0.55, 0.58, 0.78, 1))
+
 	# Update hint count
 	hint_count.text = "💡 %d" % state.hints_used
 

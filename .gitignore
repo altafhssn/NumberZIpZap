@@ -5,6 +5,9 @@
 # Build artifacts
 build/
 
+# Godot Android Gradle build template (regenerate via Install Android Build Template)
+/android/
+
 # Claude worktrees / local
 .claude/
 

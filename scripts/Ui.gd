@@ -43,7 +43,7 @@ func _make_click() -> AudioStreamWAV:
 	for i in range(count):
 		var t := float(i) / float(RATE)
 		var prog := t / dur
-		var freq := lerp(880.0, 1040.0, prog)
+		var freq: float = lerp(880.0, 1040.0, prog)
 		var s := sin(TAU * freq * t)
 		var atk := minf(1.0, t / 0.003)
 		var dec: float = pow(1.0 - prog, 1.8)

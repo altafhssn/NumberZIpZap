@@ -14,6 +14,9 @@ var _s_error: AudioStreamWAV
 var _s_win: AudioStreamWAV
 var _s_fail: AudioStreamWAV
 
+var _music_player: AudioStreamPlayer
+var _music_on := false
+
 func _ready():
 	# Small pool so overlapping moves don't cut each other off
 	for i in range(5):
@@ -27,6 +30,26 @@ func _ready():
 	_s_error = _tone([{ "f": 200.0, "to": 130.0 }], 0.20, 0.40, "square")
 	_s_fail = _tone([{ "f": 440.0, "to": 110.0 }], 0.45, 0.42, "tri")
 	_s_win = _arp([523.25, 659.25, 783.99, 1046.5], 0.12, 0.40)
+
+	_music_player = AudioStreamPlayer.new()
+	_music_player.bus = "Master"
+	_music_player.volume_db = -7.0
+	_music_player.stream = _make_music()
+	add_child(_music_player)
+	_update_music()
+
+func _process(_delta):
+	# React to the sound setting being toggled from the Settings screen
+	if GameData.sound_on != _music_on:
+		_update_music()
+
+func _update_music():
+	_music_on = GameData.sound_on
+	if _music_on:
+		if not _music_player.playing:
+			_music_player.play()
+	else:
+		_music_player.stop()
 
 func play_move(): _play(_s_move)
 func play_dot(): _play(_s_dot)
@@ -89,6 +112,48 @@ func _arp(freqs: Array, note_dur: float, vol: float) -> AudioStreamWAV:
 			var amp := s * atk * dec * vol
 			_write_sample(data, n * per + i, amp)
 	return _to_wav(data)
+
+# Calm seamless ambient pad. All partial + LFO frequencies are snapped to
+# integer multiples of 1/L so the buffer is perfectly periodic — no loop click.
+func _make_music() -> AudioStreamWAV:
+	var L := 16.0
+	var count := int(RATE * L)
+	var base := 1.0 / L
+	# [freq, amp, lfo_rate, lfo_depth]  — A-major drone with shimmer
+	var partials := [
+		[110.0, 0.22, 0.05, 0.5],
+		[164.81, 0.16, 0.07, 0.6],
+		[220.0, 0.16, 0.06, 0.6],
+		[277.18, 0.12, 0.083, 0.7],
+		[329.63, 0.10, 0.11, 0.7],
+		[440.0, 0.07, 0.13, 0.8],
+		[554.37, 0.05, 0.17, 0.9],
+	]
+	var snapped := []
+	var norm := 0.0
+	for p in partials:
+		var f: float = maxf(base, round(p[0] / base) * base)
+		var lf: float = maxf(base, round(p[2] / base) * base)
+		snapped.append([f, p[1], lf, p[3]])
+		norm += p[1]
+
+	var data := PackedByteArray()
+	data.resize(count * 2)
+	for i in range(count):
+		var t := float(i) / float(RATE)
+		var s := 0.0
+		for p in snapped:
+			var depth: float = p[3]
+			var lfo: float = 0.5 * (1.0 + sin(TAU * p[2] * t))
+			var amp: float = p[1] * ((1.0 - depth) + depth * lfo)
+			s += amp * sin(TAU * p[0] * t)
+		_write_sample(data, i, (s / norm) * 0.85)
+
+	var w := _to_wav(data)
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	w.loop_begin = 0
+	w.loop_end = count
+	return w
 
 func _write_sample(data: PackedByteArray, idx: int, amp: float):
 	var v := int(clampf(amp, -1.0, 1.0) * 32767.0)

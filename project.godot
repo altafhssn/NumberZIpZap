@@ -32,7 +32,7 @@ window/size/min_width=360
 window/size/min_height=640
 window/size/resizable=false
 window/dpi/allow_hidpi=true
-window/handheld/orientation="portrait"
+window/handheld/orientation=1
 
 [input_devices]
 

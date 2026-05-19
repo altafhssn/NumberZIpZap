@@ -46,6 +46,10 @@ var grid_radius: float = 18.0
 var is_dragging: bool = false
 var last_touch_cell: Vector2i = Vector2i(-1, -1)
 
+# VFX
+var ripples: Array = []   # [{ "pos": Vector2, "t": float }]
+const RIPPLE_DUR := 0.55
+
 # Animation
 var anim_timer: float = 0.0
 var is_completing: bool = false
@@ -193,8 +197,32 @@ func _process(delta):
 			error_cell = Vector2i(-1, -1)
 			error_message = ""
 	
-	if needs_redraw:
-		queue_redraw()
+	if not ripples.is_empty():
+		var alive: Array = []
+		for rp in ripples:
+			rp["t"] += delta
+			if rp["t"] < RIPPLE_DUR:
+				alive.append(rp)
+		ripples = alive
+
+	# Continuous redraw keeps the glow pulse, dot pulse, ripples and
+	# completion shimmer animating smoothly.
+	queue_redraw()
+
+func spawn_ripple(row: int, col: int):
+	ripples.append({ "pos": _cell_center(row, col), "t": 0.0 })
+	queue_redraw()
+
+func _draw_ripples():
+	for rp in ripples:
+		var k: float = rp["t"] / RIPPLE_DUR
+		var radius: float = lerp(cell_size * 0.25, cell_size * 0.85, k)
+		var col := path_end
+		col.a = (1.0 - k) * 0.6
+		draw_circle(rp["pos"], radius, col, false, maxf(2.0, cell_size * 0.06), true)
+		var inner := Color("#FFFFFF")
+		inner.a = (1.0 - k) * 0.35
+		draw_circle(rp["pos"], radius * 0.55, inner, false, maxf(1.5, cell_size * 0.03), true)
 
 func _create_fill_animation(row: int, col: int, color: Color):
 	# Simple pulse - just queue redraw
@@ -213,6 +241,7 @@ func _draw():
 	_draw_background()
 	_draw_grid_background()
 	_draw_path()
+	_draw_ripples()
 	_draw_hint()
 	_draw_errors()
 	_draw_dots()
@@ -274,14 +303,20 @@ func _draw_path():
 
 	var w := maxf(6.0, cell_size * 0.34)
 
-	# Glow underlay
-	if not is_completing and path_cells.size() >= 2:
-		for i in range(path_cells.size() - 1):
-			var g1 = _cell_center(path_cells[i][0], path_cells[i][1])
-			var g2 = _cell_center(path_cells[i + 1][0], path_cells[i + 1][1])
-			var gc = path_start.lerp(path_end, float(i) / float(maxi(1, path_cells.size())))
-			gc.a = 0.18
-			draw_line(g1, g2, gc, w * 1.7, true)
+	# Animated glowing line — two soft passes whose alpha breathes over time
+	if path_cells.size() >= 2:
+		var pulse: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.004)
+		var passes = [
+			{ "mult": 2.6, "a": lerp(0.06, 0.14, pulse) },
+			{ "mult": 1.7, "a": lerp(0.18, 0.30, pulse) },
+		]
+		for pass_def in passes:
+			for i in range(path_cells.size() - 1):
+				var g1 = _cell_center(path_cells[i][0], path_cells[i][1])
+				var g2 = _cell_center(path_cells[i + 1][0], path_cells[i + 1][1])
+				var gc = path_start.lerp(path_end, float(i) / float(maxi(1, path_cells.size())))
+				gc.a = pass_def["a"]
+				draw_line(g1, g2, gc, w * pass_def["mult"], true)
 
 	# Rounded ribbon: caps at every node + thick segments
 	for i in range(path_cells.size()):
@@ -299,12 +334,16 @@ func _draw_path():
 				seg_col = complete_flash.lerp(seg_col, 1.0 - completion_progress)
 			draw_line(center, nxt, seg_col, w, true)
 
-	# Bright head marker
+	# Bright pulsing head marker
 	if not is_completing:
 		var head = _cell_center(path_cells[-1][0], path_cells[-1][1])
+		var hp: float = 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
+		var halo = path_end
+		halo.a = lerp(0.20, 0.45, hp)
+		draw_circle(head, w * lerp(0.7, 0.95, hp), halo)
 		var hc = path_end
-		hc.a = 0.5
-		draw_circle(head, w * 0.62, hc)
+		hc.a = 0.55
+		draw_circle(head, w * 0.6, hc)
 		draw_circle(head, w * 0.34, Color("#FFFFFF"))
 
 func _draw_dots():

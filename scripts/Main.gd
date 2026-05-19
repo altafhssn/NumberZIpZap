@@ -14,6 +14,9 @@ var game_state = null
 # Preloads
 var LevelGeneratorScript = preload("res://scripts/LevelGenerator.gd")
 var GameStateScript = preload("res://scripts/GameState.gd")
+var AudioScript = preload("res://scripts/Audio.gd")
+
+var audio = null
 
 # Level progression
 var current_level: int = 1
@@ -25,7 +28,9 @@ var dot_counts = [6, 6, 7, 8, 9, 10, 12]
 func _ready():
 	level_gen = LevelGeneratorScript.new()
 	game_state = GameStateScript.new()
-	
+	audio = AudioScript.new()
+	add_child(audio)
+
 	_start_new_level()
 
 func _start_new_level():
@@ -66,15 +71,24 @@ func on_cell_tapped(row: int, col: int):
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
 		grid.show_error(row, col, result.get("message", "Failed"))
 		hud.show_fail(result.get("message", "Failed"))
+		audio.play_fail()
 	elif result.get("success", false):
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
 		hud.update_stats(game_state)
 
+		if result.get("dot_reached", false):
+			grid.spawn_ripple(row, col)
+			audio.play_dot()
+		else:
+			audio.play_move()
+
 		if result.get("completed", false):
+			audio.play_win()
 			_on_level_complete()
 	else:
 		# Show error feedback
 		grid.show_error(row, col, result.get("message", ""))
+		audio.play_error()
 
 func on_cell_drag(row: int, col: int):
 	on_cell_tapped(row, col)

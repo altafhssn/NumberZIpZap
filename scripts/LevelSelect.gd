@@ -13,7 +13,7 @@ const PACK_NAMES := ["Tutorial", "Sunrise", "Nebula", "Void", "Nova", "Singulari
 var _pack := 0
 
 func _ready():
-	back_btn.pressed.connect(func(): get_tree().change_scene_to_file("res://scenes/Home.tscn"))
+	back_btn.pressed.connect(func(): Transition.goto("res://scenes/Home.tscn"))
 	prev_btn.pressed.connect(func(): _change_pack(-1))
 	next_btn.pressed.connect(func(): _change_pack(1))
 	# Open on the pack containing the furthest unlocked level
@@ -75,4 +75,4 @@ func _make_tile(level: int) -> Button:
 
 func _on_pick(level: int):
 	GameData.selected_level = level
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	Transition.goto("res://scenes/Main.tscn")

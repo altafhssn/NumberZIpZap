@@ -158,7 +158,7 @@ func on_pause():
 
 func on_home():
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/Home.tscn")
+	Transition.goto("res://scenes/Home.tscn")
 
 # Called from HUD via signals
 func _on_hud_next():

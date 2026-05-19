@@ -17,10 +17,10 @@ func _ready():
 
 func _on_play():
 	GameData.selected_level = GameData.max_unlocked
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	Transition.goto("res://scenes/Main.tscn")
 
 func _on_levels():
-	get_tree().change_scene_to_file("res://scenes/LevelSelect.tscn")
+	Transition.goto("res://scenes/LevelSelect.tscn")
 
 func _on_settings():
 	if has_node("Settings"):

@@ -75,6 +75,7 @@ func on_cell_tapped(row: int, col: int):
 	if result.get("rewound", false):
 		grid.refresh_from_state(game_state)
 		hud.update_stats(game_state)
+		_haptic(8)
 	elif result.get("failed", false):
 		# Grid filled but path did not end on the last number
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
@@ -92,6 +93,7 @@ func on_cell_tapped(row: int, col: int):
 			_haptic(15)
 		else:
 			audio.play_move()
+			_haptic(8)
 
 		if result.get("completed", false):
 			audio.play_win()
@@ -114,17 +116,20 @@ func on_undo():
 	if game_state.undo():
 		grid.refresh_from_state(game_state)
 		hud.update_stats(game_state)
+		_haptic(10)
 
 func on_reset():
 	game_state.full_reset()
 	grid.refresh_from_state(game_state)
 	hud.update_stats(game_state)
+	_haptic(18)
 
 func on_hint():
 	var hint = game_state.get_hint()
 	if hint.size() == 2:
 		grid.show_hint(hint[0], hint[1])
 		hud.update_stats(game_state)
+		_haptic(12)
 
 func _on_level_complete():
 	var stars = game_state.get_stars()

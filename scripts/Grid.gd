@@ -98,9 +98,13 @@ func refresh_from_state(state):
 		add_path_cell(cell[0], cell[1], _is_dot(cell[0], cell[1]))
 	
 	is_completing = false
-	is_dragging = false
+	# NOTE: do not reset is_dragging here — refresh_from_state runs mid-drag
+	# during tap/drag-back rewind; clearing it would freeze input until release.
 	hint_cell = Vector2i(-1, -1)
 	error_cell = Vector2i(-1, -1)
+	if state.player_path.size() > 0:
+		var tail = state.player_path[-1]
+		last_touch_cell = Vector2i(tail[0], tail[1])
 	queue_redraw()
 
 func add_path_cell(row: int, col: int, reached_dot: bool):

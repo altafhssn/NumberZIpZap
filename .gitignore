@@ -1,0 +1,12 @@
+# Godot specific ignores
+.godot/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

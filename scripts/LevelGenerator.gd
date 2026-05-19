@@ -1,0 +1,271 @@
+# LevelGenerator.gd
+# Generates ZipPath levels using Hamiltonian path + Warnsdorff heuristic
+# Each level: N×N grid, K numbered dots, path visits every cell exactly once
+extends RefCounted
+
+# Generate a complete level
+# Returns Dictionary with: grid_size, dots, solution, difficulty
+func generate(grid_size: int, dot_count: int, seed_val: int = -1) -> Dictionary:
+	if seed_val >= 0:
+		seed(seed_val)
+	else:
+		randomize()
+	
+	# Step 1: Find Hamiltonian path
+	var path = _find_hamiltonian_path(grid_size)
+	if path.is_empty():
+		push_error("LevelGenerator: Failed to generate Hamiltonian path for grid ", grid_size)
+		return {}
+	
+	# Step 2: Place dots along the path
+	var dots = _place_dots(path, dot_count, grid_size)
+	if dots.is_empty():
+		push_error("LevelGenerator: Failed to place dots")
+		return {}
+	
+	# Step 3: Calculate difficulty
+	var difficulty = _calculate_difficulty(grid_size, dots, path)
+	
+	# Step 4: Build level data
+	var level_data = {
+		"id": "lvl_gen_%d" % randi(),
+		"grid_size": grid_size,
+		"dots": dots,
+		"solution": _path_to_cell_list(path),
+		"difficulty": difficulty,
+		"seed": seed_val if seed_val >= 0 else randi()
+	}
+	
+	return level_data
+
+
+# Find a Hamiltonian path visiting every cell exactly once
+# Uses randomized DFS + Warnsdorff heuristic for efficiency
+func _find_hamiltonian_path(grid_size: int) -> Array:
+	var total_cells = grid_size * grid_size
+	var attempts = 0
+	var max_attempts = 200
+	
+	while attempts < max_attempts:
+		attempts += 1
+		var start_row = randi() % grid_size
+		var start_col = randi() % grid_size
+		var start = Vector2(start_row, start_col)
+		
+		var path = []
+		var visited = {}
+		
+		if _dfs(start, grid_size, visited, path, total_cells):
+			return path
+	
+	return []
+
+
+# DFS with Warnsdorff heuristic
+func _dfs(pos: Vector2, grid_size: int, visited: Dictionary, path: Array, total_cells: int) -> bool:
+	visited[pos] = true
+	path.append(pos)
+	
+	if path.size() == total_cells:
+		return true  # All cells visited
+	
+	# Get unvisited neighbors
+	var neighbors = _get_neighbors(pos, grid_size)
+	var unvisited = []
+	for n in neighbors:
+		if not visited.has(n):
+			unvisited.append(n)
+	
+	if unvisited.is_empty():
+		# Dead end — backtrack
+		visited.erase(pos)
+		path.pop_back()
+		return false
+	
+	# Warnsdorff heuristic: sort by fewest onward exits
+	unvisited.sort_custom(func(a, b):
+		return _warnsdorff_score(a, visited, grid_size) < _warnsdorff_score(b, visited, grid_size))
+	
+	# Randomize in case of ties (within same score group)
+	# Fisher-Yates shuffle on subgroups with equal scores
+	var shuffled = []
+	var i = 0
+	while i < unvisited.size():
+		var score = _warnsdorff_score(unvisited[i], visited, grid_size)
+		var group = [unvisited[i]]
+		var j = i + 1
+		while j < unvisited.size() and _warnsdorff_score(unvisited[j], visited, grid_size) == score:
+			group.append(unvisited[j])
+			j += 1
+		# Shuffle this tie group
+		group.shuffle()
+		shuffled.append_array(group)
+		i = j
+	
+	for nbr in shuffled:
+		if _dfs(nbr, grid_size, visited, path, total_cells):
+			return true
+	
+	# Backtrack
+	visited.erase(pos)
+	path.pop_back()
+	return false
+
+
+# Warnsdorff score: number of unvisited neighbors
+# Lower = better (fewer onward exits = explore this first)
+func _warnsdorff_score(pos: Vector2, visited: Dictionary, grid_size: int) -> int:
+	var count = 0
+	for n in _get_neighbors(pos, grid_size):
+		if not visited.has(n):
+			count += 1
+	return count
+
+
+# Get orthogonal neighbors within bounds
+func _get_neighbors(pos: Vector2, grid_size: int) -> Array:
+	var neighbors = []
+	var dirs = [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]
+	for d in dirs:
+		var n = pos + d
+		if n.x >= 0 and n.x < grid_size and n.y >= 0 and n.y < grid_size:
+			neighbors.append(n)
+	return neighbors
+
+
+# Place K dots along the Hamiltonian path with constraints
+func _place_dots(path: Array, dot_count: int, grid_size: int) -> Array:
+	if dot_count < 2:
+		dot_count = 2
+	if dot_count > path.size():
+		dot_count = path.size()
+	
+	var min_seg = maxi(2, grid_size / 2)
+	var max_seg = 2 * grid_size
+	
+	var dots = []
+	var path_len = path.size()
+	
+	# Dot 1 at or near start of path
+	var start_offset = randi() % maxi(1, min_seg / 2)
+	var first_dot_idx = mini(start_offset, path_len - 1)
+	dots.append({
+		"number": 1,
+		"row": int(path[first_dot_idx].x),
+		"col": int(path[first_dot_idx].y),
+		"index": first_dot_idx
+	})
+	
+	# Try to place remaining dots
+	var remaining = dot_count - 1
+	var last_idx = first_dot_idx
+	var segment_lengths = []
+	
+	# First pass: distribute evenly
+	var ideal_seg = (path_len - first_dot_idx) / remaining
+	var attempts = 0
+	
+	for n in range(2, dot_count + 1):
+		var min_idx = last_idx + min_seg
+		var max_idx = last_idx + max_seg
+		var target_idx = last_idx + maxi(min_seg, mini(ideal_seg, max_seg))
+		
+		# Ensure room for remaining dots
+		var dots_left = dot_count - n
+		if dots_left > 0:
+			var max_allowed = path_len - (dots_left * min_seg) - 1
+			target_idx = mini(target_idx, max_allowed)
+		
+		# Find the best index near target that includes a turn
+		var best_idx = -1
+		var best_turns = -1
+		
+		for offset in range(0, maxi(1, ideal_seg / 2)):
+			for sign in [1, -1]:
+				var candidate = target_idx + (offset * sign)
+				if candidate > last_idx + min_seg and candidate < path_len - (dots_left * min_seg + 1):
+					var turns = _count_turns(path, last_idx, candidate)
+					if turns > best_turns:
+						best_turns = turns
+						best_idx = candidate
+		
+		if best_idx < 0:
+			best_idx = mini(last_idx + min_seg, path_len - 1)
+		
+		dots.append({
+			"number": n,
+			"row": int(path[best_idx].x),
+			"col": int(path[best_idx].y),
+			"index": best_idx
+		})
+		segment_lengths.append(best_idx - last_idx)
+		last_idx = best_idx
+		
+		# Ensure last dot is near the end
+		if n == dot_count and path_len - last_idx > max_seg:
+			dots[-1]["index"] = path_len - 1
+			dots[-1]["row"] = int(path[path_len - 1].x)
+			dots[-1]["col"] = int(path[path_len - 1].y)
+	
+	return dots
+
+
+# Count 90° turns in a path segment
+func _count_turns(path: Array, from_idx: int, to_idx: int) -> int:
+	if to_idx - from_idx < 2:
+		return 0
+	var turns = 0
+	for i in range(from_idx + 1, to_idx):
+		var prev = path[i - 1]
+		var curr = path[i]
+		var next = path[i + 1]
+		var d1 = curr - prev
+		var d2 = next - curr
+		if d1 != d2:
+			turns += 1
+	return turns
+
+
+# Calculate difficulty score D ∈ [0, 100]
+func _calculate_difficulty(grid_size: int, dots: Array, path: Array) -> float:
+	var K = float(dots.size())
+	var Kmax = float(maxi(8, grid_size))
+	var w1 = 0.20  # Dot density
+	var w2 = 0.35  # Turn ratio
+	var w3 = 0.30  # Branch factor
+	var w4 = 0.15  # Grid size
+	
+	var total_cells = path.size()
+	var total_turns = 0
+	var total_branch = 0
+	
+	for i in range(1, path.size()):
+		var prev = path[i - 1]
+		var curr = path[i]
+		var next_pos = path[i + 1] if i + 1 < path.size() else curr
+		var d1 = curr - prev
+		var d2 = next_pos - curr
+		if d1 != d2:
+			total_turns += 1
+		# Branch factor at this cell
+		var nbrs = 0
+		for n in _get_neighbors(curr, grid_size):
+			nbrs += 1
+		if nbrs > 2:
+			total_branch += (nbrs - 2)
+	
+	var turn_ratio = total_turns / float(maxi(1, total_cells))
+	var branch_factor = total_branch / float(maxi(1, total_cells))
+	
+	var D = (w1 * (K / Kmax) + w2 * (turn_ratio * 10) + w3 * (branch_factor * 5) + w4 * (grid_size / 10.0)) * 100.0
+	D = clampf(D, 0.0, 100.0)
+	
+	return round(D * 10.0) / 10.0
+
+
+# Convert Vector2 path to cell coordinate array [[row, col], ...]
+func _path_to_cell_list(path: Array) -> Array:
+	var cells = []
+	for p in path:
+		cells.append([int(p.x), int(p.y)])
+	return cells

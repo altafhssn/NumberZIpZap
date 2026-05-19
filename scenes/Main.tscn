@@ -116,6 +116,19 @@ theme_override_font_sizes/font_size = 13
 text = "0% filled"
 horizontal_alignment = 1
 
+[node name="PauseBtn" type="Button" parent="HUD"]
+offset_left = 20.0
+offset_top = 24.0
+offset_right = 64.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "❚❚"
+
 [node name="UndoBtn" type="Button" parent="HUD"]
 offset_left = 28.0
 offset_top = 720.0

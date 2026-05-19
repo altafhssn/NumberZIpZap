@@ -15,6 +15,7 @@ var game_state = null
 var LevelGeneratorScript = preload("res://scripts/LevelGenerator.gd")
 var GameStateScript = preload("res://scripts/GameState.gd")
 var AudioScript = preload("res://scripts/Audio.gd")
+var PauseScene = preload("res://scenes/Pause.tscn")
 
 var audio = null
 
@@ -30,6 +31,10 @@ func _ready():
 	game_state = GameStateScript.new()
 	audio = AudioScript.new()
 	add_child(audio)
+
+	# Resume from the level chosen on Home / Level Select
+	current_level = maxi(1, GameData.selected_level)
+	current_pack = mini((current_level - 1) / levels_per_pack, grid_sizes.size() - 1)
 
 	_start_new_level()
 
@@ -115,7 +120,10 @@ func _on_level_complete():
 	var stars = game_state.get_stars()
 	var time_val = game_state.elapsed_time
 	var moves_val = game_state.moves
-	
+
+	GameData.record_result(current_level, stars)
+	GameData.selected_level = current_level + 1
+
 	emit_signal("level_completed", stars, time_val, moves_val)
 	hud.show_complete(stars, time_val, moves_val)
 
@@ -124,12 +132,24 @@ func on_next_level():
 	# Check if we move to next pack
 	if (current_level - 1) % levels_per_pack == 0 and current_level > 1:
 		current_pack = mini(current_pack + 1, grid_sizes.size() - 1)
-	
+
+	GameData.selected_level = current_level
 	_start_new_level()
 
+func on_pause():
+	if has_node("Pause"):
+		return
+	get_tree().paused = true
+	var p = PauseScene.instantiate()
+	p.name = "Pause"
+	p.resume_requested.connect(func(): get_tree().paused = false)
+	p.restart_requested.connect(func(): get_tree().paused = false; on_reset())
+	p.home_requested.connect(on_home)
+	add_child(p)
+
 func on_home():
-	# Return to pack select (goes to main menu state)
-	get_tree().change_scene_to_file("res://scenes/Main.tscn")
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/Home.tscn")
 
 # Called from HUD via signals
 func _on_hud_next():

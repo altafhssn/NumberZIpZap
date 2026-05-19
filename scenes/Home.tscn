@@ -1,0 +1,173 @@
+[gd_scene load_steps=7 format=3 uid="uid://b0home0zip001"]
+
+[ext_resource type="Script" path="res://scripts/Backdrop.gd" id="1_bd"]
+[ext_resource type="Script" path="res://scripts/Home.gd" id="2_home"]
+
+[sub_resource type="StyleBoxFlat" id="btn_accent"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.262745, 0.380392, 0.933333, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.262745, 0.380392, 0.933333, 0.4)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_accent_hover"]
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.345098, 0.45098, 0.972549, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.262745, 0.380392, 0.933333, 0.5)
+shadow_size = 18
+
+[sub_resource type="StyleBoxFlat" id="btn_ghost"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+bg_color = Color(0.117647, 0.117647, 0.227451, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.262745, 0.262745, 0.439216, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_ghost_hover"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+bg_color = Color(0.180392, 0.180392, 0.317647, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.392157, 0.392157, 0.6, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="Home" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2_home")
+
+[node name="Backdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_bd")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 170.0
+offset_right = 220.0
+offset_bottom = 240.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.262745, 0.380392, 0.933333, 0.6)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/shadow_outline_size = 14
+theme_override_font_sizes/font_size = 58
+text = "ZIPPATH"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 244.0
+offset_right = 220.0
+offset_bottom = 274.0
+theme_override_colors/font_color = Color(0.55, 0.58, 0.78, 1)
+theme_override_font_sizes/font_size = 16
+text = "Connect the dots · fill every cell"
+horizontal_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 320.0
+offset_right = 220.0
+offset_bottom = 348.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "Best: Level 1"
+horizontal_alignment = 1
+
+[node name="PlayBtn" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 430.0
+offset_right = 150.0
+offset_bottom = 494.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("btn_accent")
+theme_override_styles/hover = SubResource("btn_accent_hover")
+theme_override_styles/pressed = SubResource("btn_accent")
+theme_override_styles/focus = SubResource("btn_accent")
+text = "▶  PLAY"
+
+[node name="LevelsBtn" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 510.0
+offset_right = 150.0
+offset_bottom = 562.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_ghost")
+theme_override_styles/hover = SubResource("btn_ghost_hover")
+theme_override_styles/pressed = SubResource("btn_ghost")
+theme_override_styles/focus = SubResource("btn_ghost")
+text = "▦  Level Select"
+
+[node name="SettingsBtn" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 576.0
+offset_right = 150.0
+offset_bottom = 628.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_ghost")
+theme_override_styles/hover = SubResource("btn_ghost_hover")
+theme_override_styles/pressed = SubResource("btn_ghost")
+theme_override_styles/focus = SubResource("btn_ghost")
+text = "⚙  Settings"

@@ -1,0 +1,118 @@
+[gd_scene load_steps=5 format=3 uid="uid://b0lvl00zip001"]
+
+[ext_resource type="Script" path="res://scripts/Backdrop.gd" id="1_bd"]
+[ext_resource type="Script" path="res://scripts/LevelSelect.gd" id="2_ls"]
+
+[sub_resource type="StyleBoxFlat" id="nav"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.117647, 0.117647, 0.227451, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.262745, 0.262745, 0.439216, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxEmpty" id="empty"]
+
+[node name="LevelSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2_ls")
+
+[node name="Backdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_bd")
+
+[node name="BackBtn" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 26.0
+offset_right = 96.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "‹ Back"
+
+[node name="TitleLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 28.0
+offset_right = 200.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Level Select"
+horizontal_alignment = 1
+
+[node name="PrevPack" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 84.0
+offset_right = 64.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "‹"
+
+[node name="PackLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 88.0
+offset_right = 160.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Tutorial"
+horizontal_alignment = 1
+
+[node name="NextPack" type="Button" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -64.0
+offset_top = 84.0
+offset_right = -20.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "›"
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 140.0
+offset_right = -16.0
+offset_bottom = -20.0
+horizontal_scroll_mode = 0
+theme_override_styles/panel = SubResource("empty")
+
+[node name="Grid" type="GridContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 5
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12

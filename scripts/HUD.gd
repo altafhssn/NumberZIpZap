@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var reset_btn = $ResetBtn
 @onready var hint_btn = $HintBtn
 @onready var hint_count = $HintCount
+@onready var pause_btn = $PauseBtn
 @onready var complete_panel = $CompletePanel
 @onready var stars_label = $CompletePanel/StarsLabel
 @onready var stats_label = $CompletePanel/StatsLabel
@@ -27,6 +28,11 @@ func _connect_buttons():
 	hint_btn.pressed.connect(_on_hint_pressed)
 	next_btn.pressed.connect(_on_next_pressed)
 	home_btn.pressed.connect(_on_home_pressed)
+	pause_btn.pressed.connect(_on_pause_pressed)
+
+func _on_pause_pressed():
+	if main:
+		main.on_pause()
 
 func update_for_level(level_num: int, level_data: Dictionary):
 	var grid_size = level_data.get("grid_size", 5)

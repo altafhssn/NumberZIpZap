@@ -12,9 +12,13 @@ config_version=5
 
 config/name="ZipPath"
 config/description="Connect the dots, fill the grid."
-run/main_scene="res://scenes/Main.tscn"
+run/main_scene="res://scenes/Home.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://assets/ui/icon.png"
+
+[autoload]
+
+GameData="*res://scripts/GameData.gd"
 
 [display]
 

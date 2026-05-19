@@ -37,6 +37,8 @@ func play_fail(): _play(_s_fail)
 func _play(stream: AudioStreamWAV):
 	if stream == null:
 		return
+	if not GameData.sound_on:
+		return
 	var p: AudioStreamPlayer = _players[_next]
 	_next = (_next + 1) % _players.size()
 	p.stream = stream

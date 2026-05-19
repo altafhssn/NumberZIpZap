@@ -146,9 +146,8 @@ func _place_dots(path: Array, dot_count: int, grid_size: int) -> Array:
 	var dots = []
 	var path_len = path.size()
 	
-	# Dot 1 at or near start of path
-	var start_offset = randi() % maxi(1, min_seg / 2)
-	var first_dot_idx = mini(start_offset, path_len - 1)
+	# Dot 1 is always the first cell of the path
+	var first_dot_idx = 0
 	dots.append({
 		"number": 1,
 		"row": int(path[first_dot_idx].x),
@@ -200,13 +199,14 @@ func _place_dots(path: Array, dot_count: int, grid_size: int) -> Array:
 		})
 		segment_lengths.append(best_idx - last_idx)
 		last_idx = best_idx
-		
-		# Ensure last dot is near the end
-		if n == dot_count and path_len - last_idx > max_seg:
+
+		# The highest-numbered dot is always the final cell of the path,
+		# so completing the fill ends exactly on the last number.
+		if n == dot_count:
 			dots[-1]["index"] = path_len - 1
 			dots[-1]["row"] = int(path[path_len - 1].x)
 			dots[-1]["col"] = int(path[path_len - 1].y)
-	
+
 	return dots
 
 

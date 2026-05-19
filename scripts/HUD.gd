@@ -55,6 +55,10 @@ func update_stats(state):
 	# Update hint count
 	hint_count.text = "💡 %d" % state.hints_used
 
+func show_fail(message: String):
+	fill_label.text = "%s — Undo or Reset" % message
+	fill_label.add_theme_color_override("font_color", Color(0.94, 0.27, 0.27, 1))
+
 func show_complete(stars: int, time_sec: float, moves: int):
 	complete_panel.visible = true
 	

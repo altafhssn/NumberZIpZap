@@ -61,6 +61,11 @@ func on_cell_tapped(row: int, col: int):
 	if result.get("rewound", false):
 		grid.refresh_from_state(game_state)
 		hud.update_stats(game_state)
+	elif result.get("failed", false):
+		# Grid filled but path did not end on the last number
+		grid.add_path_cell(row, col, result.get("dot_reached", false))
+		grid.show_error(row, col, result.get("message", "Failed"))
+		hud.show_fail(result.get("message", "Failed"))
 	elif result.get("success", false):
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
 		hud.update_stats(game_state)

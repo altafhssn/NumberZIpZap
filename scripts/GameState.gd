@@ -134,13 +134,23 @@ func try_place_cell(row: int, col: int) -> Dictionary:
 	visited_cells[cell_key] = true
 	moves += 1
 	
-	# Check for win: all cells visited AND all dots reached
+	# Grid full: the path must END exactly on the highest-numbered dot,
+	# with every dot linked in order — otherwise the attempt fails.
 	var total_cells = grid_size * grid_size
-	if visited_cells.size() >= total_cells and next_dot_index >= dots.size():
-		is_completed = true
-		elapsed_time = (Time.get_ticks_msec() - start_time) / 1000.0
-		return { "success": true, "message": "Level complete!", "dot_reached": reached_dot, "completed": true }
-	
+	if visited_cells.size() >= total_cells:
+		var last_dot = dots[-1]
+		var ends_on_last = (row == last_dot["row"] and col == last_dot["col"])
+		if next_dot_index >= dots.size() and ends_on_last:
+			is_completed = true
+			elapsed_time = (Time.get_ticks_msec() - start_time) / 1000.0
+			return { "success": true, "message": "Level complete!", "dot_reached": reached_dot, "completed": true }
+		return {
+			"success": true,
+			"failed": true,
+			"dot_reached": reached_dot,
+			"message": "Path must end on dot %d" % dots.size()
+		}
+
 	return { "success": true, "message": "", "dot_reached": reached_dot }
 
 

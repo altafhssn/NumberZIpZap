@@ -1,5 +1,12 @@
 # Godot specific ignores
 .godot/
+*.import
+
+# Build artifacts
+build/
+
+# Claude worktrees / local
+.claude/
 
 # OS
 .DS_Store

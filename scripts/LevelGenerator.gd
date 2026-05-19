@@ -39,26 +39,65 @@ func generate(grid_size: int, dot_count: int, seed_val: int = -1) -> Dictionary:
 	return level_data
 
 
-# Find a Hamiltonian path visiting every cell exactly once
-# Uses randomized DFS + Warnsdorff heuristic for efficiency
+# Find a Hamiltonian path covering every cell.
+# Start from a guaranteed-valid boustrophedon (snake) path, then randomise it
+# with "backbite" moves. This is O(cells) per move, never backtracks and
+# always succeeds in milliseconds — the old randomized-DFS could take
+# several seconds on some seeds and ANR/crash on mobile.
 func _find_hamiltonian_path(grid_size: int) -> Array:
-	var total_cells = grid_size * grid_size
-	var attempts = 0
-	var max_attempts = 200
-	
-	while attempts < max_attempts:
-		attempts += 1
-		var start_row = randi() % grid_size
-		var start_col = randi() % grid_size
-		var start = Vector2(start_row, start_col)
-		
-		var path = []
-		var visited = {}
-		
-		if _dfs(start, grid_size, visited, path, total_cells):
-			return path
-	
-	return []
+	var path: Array = []
+	for r in range(grid_size):
+		if r % 2 == 0:
+			for c in range(grid_size):
+				path.append(Vector2(r, c))
+		else:
+			for c in range(grid_size - 1, -1, -1):
+				path.append(Vector2(r, c))
+
+	# Index lookup: "x,y" -> position in path
+	var idx := {}
+	for i in range(path.size()):
+		idx["%d,%d" % [path[i].x, path[i].y]] = i
+
+	var moves = path.size() * 12
+	for _m in range(moves):
+		# Pick an endpoint (0 = head, 1 = tail)
+		var at_tail = randi() % 2 == 1
+		var end_pos: Vector2 = path[-1] if at_tail else path[0]
+		var nbrs = _get_neighbors(end_pos, grid_size)
+		var nb = nbrs[randi() % nbrs.size()]
+		var j: int = idx["%d,%d" % [nb.x, nb.y]]
+
+		if at_tail:
+			# Neighbour already adjacent to the tail in the path → no-op
+			if j >= path.size() - 2:
+				continue
+			# Reverse the segment after nb up to the tail
+			var lo := j + 1
+			var hi := path.size() - 1
+			while lo < hi:
+				var tmp = path[lo]
+				path[lo] = path[hi]
+				path[hi] = tmp
+				idx["%d,%d" % [path[lo].x, path[lo].y]] = lo
+				idx["%d,%d" % [path[hi].x, path[hi].y]] = hi
+				lo += 1
+				hi -= 1
+		else:
+			if j <= 1:
+				continue
+			var lo2 := 0
+			var hi2 := j - 1
+			while lo2 < hi2:
+				var tmp2 = path[lo2]
+				path[lo2] = path[hi2]
+				path[hi2] = tmp2
+				idx["%d,%d" % [path[lo2].x, path[lo2].y]] = lo2
+				idx["%d,%d" % [path[hi2].x, path[hi2].y]] = hi2
+				lo2 += 1
+				hi2 -= 1
+
+	return path
 
 
 # DFS with Warnsdorff heuristic

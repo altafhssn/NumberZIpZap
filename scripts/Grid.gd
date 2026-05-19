@@ -127,7 +127,7 @@ func add_path_cell(row: int, col: int, reached_dot: bool):
 func show_error(row: int, col: int, message: String):
 	error_cell = Vector2i(row, col)
 	error_message = message
-	error_timer = 0.8
+	error_timer = 1.4
 	queue_redraw()
 
 func show_hint(row: int, col: int):
@@ -178,15 +178,16 @@ func _process(delta):
 	
 	if hint_timer > 0:
 		hint_timer -= delta
+		needs_redraw = true  # animate pulse
 		if hint_timer <= 0:
 			hint_cell = Vector2i(-1, -1)
-			needs_redraw = true
-	
+
 	if error_timer > 0:
 		error_timer -= delta
+		needs_redraw = true  # animate shake + toast fade
 		if error_timer <= 0:
 			error_cell = Vector2i(-1, -1)
-			needs_redraw = true
+			error_message = ""
 	
 	if needs_redraw:
 		queue_redraw()
@@ -382,13 +383,32 @@ func _draw_errors():
 		var r = error_cell.x
 		var c = error_cell.y
 		var center = _cell_center(r, c)
-		var alpha = error_timer / 0.8  # Fade out
+		var alpha = clampf(error_timer / 1.4, 0.0, 1.0)  # Fade out
 		var color = error_color
 		color.a = alpha * 0.5
 		
-		var shake = (1.0 - alpha) * 4.0
+		var shake = sin(error_timer * 50.0) * (1.0 - alpha) * 5.0
 		draw_circle(center + Vector2(shake, 0), cell_size * 0.4, color)
-		draw_circle(center + Vector2(shake, 0), cell_size * 0.4, error_color, false, 2.0)
+		draw_circle(center + Vector2(shake, 0), cell_size * 0.4, error_color, false, 2.0, true)
+
+		# Toast message below the grid
+		if error_message != "":
+			var font = ThemeDB.fallback_font
+			var fs = clampi(int(cell_size * 0.28), 14, 22)
+			var msg_w = font.get_string_size(error_message, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+			var pad_x = 18.0
+			var pad_y = 10.0
+			var box_w = msg_w + pad_x * 2
+			var box_h = fs + pad_y * 2
+			var box_x = grid_rect.position.x + (grid_rect.size.x - box_w) / 2.0
+			var box_y = grid_rect.end.y + 16.0
+			var bg = Color("#EF4444")
+			bg.a = alpha
+			_draw_round_rect(Rect2(box_x, box_y, box_w, box_h), box_h / 2.0, bg)
+			var tcol = Color("#FFFFFF")
+			tcol.a = alpha
+			var ty = box_y + pad_y + font.get_ascent(fs)
+			draw_string(font, Vector2(box_x + pad_x, ty), error_message, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, tcol)
 
 func _cell_center(row: int, col: int) -> Vector2:
 	return Vector2(

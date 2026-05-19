@@ -27,6 +27,8 @@ func _scan(n: Node):
 func _on_node_added(n: Node):
 	if n is BaseButton and not n.is_connected("pressed", _on_pressed):
 		n.pressed.connect(_on_pressed)
+		n.button_down.connect(_press.bind(n))
+		n.button_up.connect(_release.bind(n))
 
 func _on_pressed():
 	if GameData.sound_on:
@@ -34,6 +36,21 @@ func _on_pressed():
 		_player.play()
 	if GameData.haptics_on:
 		Input.vibrate_handheld(10)
+
+func _press(b: Control):
+	if not is_instance_valid(b):
+		return
+	b.pivot_offset = b.size / 2.0
+	var t := create_tween()
+	t.tween_property(b, "scale", Vector2(0.95, 0.95), 0.07) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+func _release(b: Control):
+	if not is_instance_valid(b):
+		return
+	var t := create_tween()
+	t.tween_property(b, "scale", Vector2.ONE, 0.12) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 func _make_click() -> AudioStreamWAV:
 	var dur := 0.045

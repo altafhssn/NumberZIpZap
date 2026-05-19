@@ -2,24 +2,34 @@
 # Calm seamless ambient pad that plays continuously across all screens.
 extends Node
 
-const RATE := 22050
+const RATE := 16000
 
 var _player: AudioStreamPlayer
 var _on := false
+var _ready_built := false
 
 func _ready():
 	_player = AudioStreamPlayer.new()
 	_player.bus = "Master"
 	_player.volume_db = -7.0
-	_player.stream = _make_music()
 	add_child(_player)
+	# Build the (heavy) buffer AFTER the first frame so app startup is not
+	# blocked — a synchronous build here ANRs/crashes on Android at launch.
+	_build_deferred.call_deferred()
+
+func _build_deferred():
+	await get_tree().process_frame
+	_player.stream = _make_music()
+	_ready_built = true
 	_update()
 
 func _process(_delta):
-	if GameData.sound_on != _on:
+	if _ready_built and GameData.sound_on != _on:
 		_update()
 
 func _update():
+	if not _ready_built:
+		return
 	_on = GameData.sound_on
 	if _on:
 		if not _player.playing:
@@ -30,17 +40,15 @@ func _update():
 # All partial + LFO frequencies snapped to integer multiples of 1/L so the
 # buffer is perfectly periodic — a click-free loop.
 func _make_music() -> AudioStreamWAV:
-	var L := 16.0
+	var L := 10.0
 	var count := int(RATE * L)
 	var base := 1.0 / L
 	var partials := [
-		[110.0, 0.22, 0.05, 0.5],
-		[164.81, 0.16, 0.07, 0.6],
+		[110.0, 0.24, 0.05, 0.5],
+		[164.81, 0.18, 0.07, 0.6],
 		[220.0, 0.16, 0.06, 0.6],
 		[277.18, 0.12, 0.083, 0.7],
-		[329.63, 0.10, 0.11, 0.7],
-		[440.0, 0.07, 0.13, 0.8],
-		[554.37, 0.05, 0.17, 0.9],
+		[329.63, 0.09, 0.11, 0.7],
 	]
 	var tuned := []
 	var norm := 0.0

@@ -80,10 +80,48 @@ func show_complete(stars: int, time_sec: float, moves: int):
 	var secs = int(time_sec) % 60
 	stats_label.text = "Time: %d:%02d  |  Moves: %d" % [mins, secs, moves]
 	
-	# Animate in
-	var tween = create_tween()
+	# Panel pops in with a slight overshoot
+	complete_panel.pivot_offset = complete_panel.size / 2.0
 	complete_panel.modulate = Color(1, 1, 1, 0)
-	tween.tween_property(complete_panel, "modulate", Color(1, 1, 1, 1), 0.5)
+	complete_panel.scale = Vector2(0.7, 0.7)
+	var tw = create_tween().set_parallel(true)
+	tw.tween_property(complete_panel, "modulate", Color(1, 1, 1, 1), 0.25)
+	tw.tween_property(complete_panel, "scale", Vector2.ONE, 0.45) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# Stars pop in one-by-one
+	stars_label.pivot_offset = stars_label.size / 2.0
+	stars_label.scale = Vector2(0.2, 0.2)
+	var st = create_tween()
+	st.tween_interval(0.25)
+	st.tween_property(stars_label, "scale", Vector2(1.15, 1.15), 0.18) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	st.tween_property(stars_label, "scale", Vector2.ONE, 0.12)
+
+	if stars > 0:
+		_burst(stars)
+
+func _burst(stars: int):
+	var p := CPUParticles2D.new()
+	p.position = Vector2(complete_panel.size.x / 2.0, 70.0)
+	p.emitting = false
+	p.one_shot = true
+	p.explosiveness = 0.9
+	p.amount = 14 + stars * 10
+	p.lifetime = 1.1
+	p.direction = Vector2(0, -1)
+	p.spread = 60.0
+	p.initial_velocity_min = 180.0
+	p.initial_velocity_max = 320.0
+	p.gravity = Vector2(0, 480)
+	p.scale_amount_min = 2.0
+	p.scale_amount_max = 4.0
+	p.color = Color(1, 0.82, 0.4, 1)
+	complete_panel.add_child(p)
+	p.emitting = true
+	get_tree().create_timer(2.0).timeout.connect(func():
+		if is_instance_valid(p):
+			p.queue_free())
 
 func _on_undo_pressed():
 	if main:

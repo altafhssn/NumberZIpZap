@@ -96,13 +96,20 @@ func try_place_cell(row: int, col: int) -> Dictionary:
 	if abs(last[0] - row) + abs(last[1] - col) != 1:
 		return { "success": false, "message": "Must be adjacent", "dot_reached": false }
 	
-	# Check if this is a dot we should be going to next
-	var reached_dot = false
+	# Enforce dot ordering: you may only step onto a numbered dot if it is
+	# the next one in sequence. Stepping onto a later number first is illegal
+	# (otherwise the grid can be filled into an unsolvable 100% dead state).
+	var this_dot = get_dot_at(row, col)
+	var expected_num = -1
 	if next_dot_index < dots.size():
-		var next_dot = dots[next_dot_index]
-		if row == next_dot["row"] and col == next_dot["col"]:
-			reached_dot = true
-			next_dot_index += 1
+		expected_num = dots[next_dot_index]["number"]
+
+	var reached_dot = false
+	if this_dot != -1:
+		if this_dot != expected_num:
+			return { "success": false, "message": "Reach dot %d first" % expected_num, "dot_reached": false }
+		reached_dot = true
+		next_dot_index += 1
 	
 	# Place the cell
 	player_path.append([row, col])

@@ -19,6 +19,7 @@ var elapsed_time: float = 0.0
 
 # Grid of visited cells
 var visited_cells: Dictionary = {}    # "r,c" -> true
+var blocked: Dictionary = {}          # "r,c" -> true (impassable cells)
 
 # Colors for this level
 var path_color_start: Color = Color("#4361EE")
@@ -48,6 +49,10 @@ func load_level(data: Dictionary):
 	grid_size = data.get("grid_size", 5)
 	dots = data.get("dots", [])
 	solution = data.get("solution", [])
+
+	blocked.clear()
+	for b in data.get("blocked", []):
+		blocked["%d,%d" % [b[0], b[1]]] = true
 	
 	# Pick a theme based on difficulty
 	var diff = data.get("difficulty", 50)
@@ -75,7 +80,11 @@ func try_place_cell(row: int, col: int) -> Dictionary:
 		return { "success": false, "message": "Level complete!", "dot_reached": false }
 	
 	var cell_key = "%d,%d" % [row, col]
-	
+
+	# Impassable block
+	if blocked.has(cell_key):
+		return { "success": false, "message": "Blocked", "dot_reached": false }
+
 	# If player_path is empty, must start at dot 1
 	if player_path.is_empty():
 		if _is_dot_at(1, row, col):
@@ -136,7 +145,7 @@ func try_place_cell(row: int, col: int) -> Dictionary:
 	
 	# Grid full: the path must END exactly on the highest-numbered dot,
 	# with every dot linked in order — otherwise the attempt fails.
-	var total_cells = grid_size * grid_size
+	var total_cells = grid_size * grid_size - blocked.size()
 	if visited_cells.size() >= total_cells:
 		var last_dot = dots[-1]
 		var ends_on_last = (row == last_dot["row"] and col == last_dot["col"])
@@ -188,7 +197,7 @@ func full_reset():
 
 # Get fill percentage
 func get_fill_pct() -> float:
-	var total = grid_size * grid_size
+	var total = grid_size * grid_size - blocked.size()
 	if total <= 0:
 		return 0.0
 	return (float(visited_cells.size()) / float(total)) * 100.0

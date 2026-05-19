@@ -47,12 +47,17 @@ func _start_new_level():
 	var gs = clampi(5 + (lvl - 1) / 10, 5, 9)
 	var max_dots = mini(gs + 2, gs * gs - 1)
 	var dc = clampi(6 + (lvl - 1) / 5, 6, max_dots)
-	
+
+	# From level 11+: random impassable blocks, +1 every 8 levels (cap gs).
+	var blocks = 0
+	if lvl > 10:
+		blocks = clampi(1 + (lvl - 11) / 8, 1, gs)
+
 	# Generate level
-	var data = level_gen.generate(gs, dc, current_level * 1000 + Time.get_ticks_msec())
+	var data = level_gen.generate(gs, dc, current_level * 1000 + Time.get_ticks_msec(), blocks)
 	if data.is_empty():
 		# Fallback
-		data = level_gen.generate(5, 4, randi())
+		data = level_gen.generate(5, 4, randi(), 0)
 	
 	game_state.load_level(data)
 	

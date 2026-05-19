@@ -5,37 +5,46 @@ extends RefCounted
 
 # Generate a complete level
 # Returns Dictionary with: grid_size, dots, solution, difficulty
-func generate(grid_size: int, dot_count: int, seed_val: int = -1) -> Dictionary:
+func generate(grid_size: int, dot_count: int, seed_val: int = -1, block_count: int = 0) -> Dictionary:
 	if seed_val >= 0:
 		seed(seed_val)
 	else:
 		randomize()
-	
-	# Step 1: Find Hamiltonian path
-	var path = _find_hamiltonian_path(grid_size)
-	if path.is_empty():
+
+	# Step 1: Hamiltonian path over the whole grid
+	var full = _find_hamiltonian_path(grid_size)
+	if full.is_empty():
 		push_error("LevelGenerator: Failed to generate Hamiltonian path for grid ", grid_size)
 		return {}
-	
-	# Step 2: Place dots along the path
+
+	# Step 2: Block off the tail cells of the path. The remaining prefix is
+	# still a valid Hamiltonian path over exactly the non-blocked cells, so
+	# the level stays solvable; backbite randomises where the tail lands.
+	var b = clampi(block_count, 0, full.size() - maxi(dot_count, 2) - 1)
+	var blocked: Array = []
+	var path = full
+	if b > 0:
+		blocked = full.slice(full.size() - b, full.size())
+		path = full.slice(0, full.size() - b)
+
+	# Step 3: Place dots along the (non-blocked) solution path
 	var dots = _place_dots(path, dot_count, grid_size)
 	if dots.is_empty():
 		push_error("LevelGenerator: Failed to place dots")
 		return {}
-	
-	# Step 3: Calculate difficulty
+
+	# Step 4: Difficulty + level data
 	var difficulty = _calculate_difficulty(grid_size, dots, path)
-	
-	# Step 4: Build level data
 	var level_data = {
 		"id": "lvl_gen_%d" % randi(),
 		"grid_size": grid_size,
 		"dots": dots,
 		"solution": _path_to_cell_list(path),
+		"blocked": _path_to_cell_list(blocked),
 		"difficulty": difficulty,
 		"seed": seed_val if seed_val >= 0 else randi()
 	}
-	
+
 	return level_data
 
 

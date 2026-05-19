@@ -14,6 +14,7 @@ var grid_rect: Rect2
 var cells: Dictionary = {}      # "r,c" -> {"fill_color": Color, "is_dot": bool, "dot_num": int}
 var path_cells: Array = []      # [[r,c], ...] in order placed
 var dot_positions: Dictionary = {}  # "r,c" -> int (dot number)
+var blocked_cells: Dictionary = {}  # "r,c" -> true (impassable)
 var solution_dots: Array = []   # Full dot data from level
 
 # Hint
@@ -66,6 +67,11 @@ func setup(level_data: Dictionary):
 	dot_positions.clear()
 	for d in solution_dots:
 		dot_positions["%d,%d" % [d["row"], d["col"]]] = d["number"]
+
+	# Blocked (impassable) cells
+	blocked_cells.clear()
+	for b in level_data.get("blocked", []):
+		blocked_cells["%d,%d" % [b[0], b[1]]] = true
 	
 	# Calculate cell size to fit screen
 	var screen_size = get_viewport_rect().size
@@ -295,6 +301,11 @@ func _draw_grid_background():
 			var x = grid_rect.position.x + c * cell_size + inset
 			var y = grid_rect.position.y + r * cell_size + inset
 			var w = cell_size - inset * 2
+			if blocked_cells.has(key):
+				# Impassable block — solid dark slab with a subtle border
+				_draw_round_rect(Rect2(x, y, w, w), cr, Color("#05050C"))
+				_draw_round_rect(Rect2(x, y, w, w), cr, Color("#3A2030"), 2.0)
+				continue
 			var tile_col = cell_empty
 			if cells.has(key):
 				tile_col = (cells[key]["fill_color"] as Color).darkened(0.5)

@@ -87,9 +87,27 @@ func try_place_cell(row: int, col: int) -> Dictionary:
 		else:
 			return { "success": false, "message": "Start at dot 1", "dot_reached": false }
 	
-	# Check if cell was already visited
+	# Tapping a cell already on the path rewinds back to it (trim the tail).
 	if visited_cells.has(cell_key):
-		return { "success": false, "message": "Already visited", "dot_reached": false }
+		var idx := -1
+		for i in range(player_path.size()):
+			if player_path[i][0] == row and player_path[i][1] == col:
+				idx = i
+				break
+		if idx < 0:
+			return { "success": false, "message": "Already visited", "dot_reached": false }
+		player_path = player_path.slice(0, idx + 1)
+		visited_cells.clear()
+		for cell in player_path:
+			visited_cells["%d,%d" % [cell[0], cell[1]]] = true
+		# Recompute how many dots are still validly linked
+		next_dot_index = 0
+		for cell in player_path:
+			if next_dot_index < dots.size():
+				var d = dots[next_dot_index]
+				if d["row"] == cell[0] and d["col"] == cell[1]:
+					next_dot_index += 1
+		return { "success": true, "message": "", "dot_reached": false, "rewound": true }
 	
 	# Check if it's adjacent to the last placed cell
 	var last = player_path[-1]

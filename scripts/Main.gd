@@ -58,10 +58,13 @@ func on_cell_tapped(row: int, col: int):
 		return
 	
 	var result = game_state.try_place_cell(row, col)
-	if result.get("success", false):
+	if result.get("rewound", false):
+		grid.refresh_from_state(game_state)
+		hud.update_stats(game_state)
+	elif result.get("success", false):
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
 		hud.update_stats(game_state)
-		
+
 		if result.get("completed", false):
 			_on_level_complete()
 	else:

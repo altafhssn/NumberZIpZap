@@ -79,6 +79,7 @@ func on_cell_tapped(row: int, col: int):
 		grid.show_error(row, col, result.get("message", "Failed"))
 		hud.show_fail(result.get("message", "Failed"))
 		audio.play_fail()
+		_haptic(35)
 	elif result.get("success", false):
 		grid.add_path_cell(row, col, result.get("dot_reached", false))
 		hud.update_stats(game_state)
@@ -86,16 +87,23 @@ func on_cell_tapped(row: int, col: int):
 		if result.get("dot_reached", false):
 			grid.spawn_ripple(row, col)
 			audio.play_dot()
+			_haptic(15)
 		else:
 			audio.play_move()
 
 		if result.get("completed", false):
 			audio.play_win()
+			_haptic(45)
 			_on_level_complete()
 	else:
 		# Show error feedback
 		grid.show_error(row, col, result.get("message", ""))
 		audio.play_error()
+		_haptic(22)
+
+func _haptic(ms: int):
+	if GameData.haptics_on:
+		Input.vibrate_handheld(ms)
 
 func on_cell_drag(row: int, col: int):
 	on_cell_tapped(row, col)

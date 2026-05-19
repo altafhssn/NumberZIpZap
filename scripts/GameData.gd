@@ -7,6 +7,7 @@ const SAVE_PATH := "user://zippath_save.json"
 var max_unlocked: int = 1          # highest level the player may enter
 var stars: Dictionary = {}         # { level:int -> stars:int }
 var sound_on: bool = true
+var haptics_on: bool = true
 var selected_level: int = 1        # level the gameplay scene should load
 
 func _ready():
@@ -37,6 +38,7 @@ func save_game():
 		"max_unlocked": max_unlocked,
 		"stars": stars,
 		"sound_on": sound_on,
+		"haptics_on": haptics_on,
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -56,6 +58,7 @@ func load_game():
 		return
 	max_unlocked = int(data.get("max_unlocked", 1))
 	sound_on = bool(data.get("sound_on", true))
+	haptics_on = bool(data.get("haptics_on", true))
 	stars.clear()
 	var s = data.get("stars", {})
 	if typeof(s) == TYPE_DICTIONARY:

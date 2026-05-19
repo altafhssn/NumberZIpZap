@@ -39,10 +39,12 @@ func _start_new_level():
 	var gs = grid_sizes[pack_idx]
 	var dc = dot_counts[pack_idx]
 	
-	# Scale dot count with level within the pack
+	# Scale dot count up as levels progress: +1 dot every 3 levels in the
+	# pack, capped so it stays solvable for the grid size.
 	var pack_level = (current_level - 1) % levels_per_pack
-	var pack_progress = float(pack_level) / float(levels_per_pack)
-	dc = clampi(int(dc + pack_progress * 3), 2, gs * 2)
+	var growth = pack_level / 3
+	var max_dots = mini(gs * gs - 1, gs * 3)
+	dc = clampi(dc + growth, 6, max_dots)
 	
 	# Generate level
 	var data = level_gen.generate(gs, dc, current_level * 1000 + Time.get_ticks_msec())

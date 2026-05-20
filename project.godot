@@ -12,7 +12,7 @@ config_version=5
 
 config/name="ZipPath"
 config/description="Connect the dots, fill the grid."
-run/main_scene="res://scenes/Home.tscn"
+run/main_scene="res://scenes/Splash.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 config/icon="res://assets/ui/icon.png"
 

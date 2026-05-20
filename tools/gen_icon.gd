@@ -23,14 +23,14 @@ func _initialize():
 			var k := clampf(1.0 - d / (SIZE * 0.55), 0.0, 1.0)
 			if k <= 0.0:
 				continue
-			var glow := Color("#4361EE")
-			glow.a = k * 0.18
+			var glow := Color("#F59E0B")
+			glow.a = k * 0.16
 			_blend(img, x, y, glow)
 
-	# Three dots arranged like a "Z" with a thick gradient ribbon
-	var c0 := Color("#5b8cff")   # blue
-	var c1 := Color("#a472ff")   # violet
-	var c2 := Color("#ff5cad")   # pink
+	# Three dots arranged like a "Z" with a thick warm gradient ribbon
+	var c0 := Color("#FFC04D")   # amber
+	var c1 := Color("#F97316")   # orange
+	var c2 := Color("#EF4444")   # red
 	var a := Vector2(150, 150)
 	var b := Vector2(362, 256)
 	var c := Vector2(150, 362)

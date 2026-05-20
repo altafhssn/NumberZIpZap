@@ -8,6 +8,7 @@ var max_unlocked: int = 1          # highest level the player may enter
 var stars: Dictionary = {}         # { level:int -> stars:int }
 var sound_on: bool = true
 var haptics_on: bool = true
+var tutorial_done: bool = false
 var selected_level: int = 1        # level the gameplay scene should load
 
 func _ready():
@@ -39,6 +40,7 @@ func save_game():
 		"stars": stars,
 		"sound_on": sound_on,
 		"haptics_on": haptics_on,
+		"tutorial_done": tutorial_done,
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -59,6 +61,7 @@ func load_game():
 	max_unlocked = int(data.get("max_unlocked", 1))
 	sound_on = bool(data.get("sound_on", true))
 	haptics_on = bool(data.get("haptics_on", true))
+	tutorial_done = bool(data.get("tutorial_done", false))
 	stars.clear()
 	var s = data.get("stars", {})
 	if typeof(s) == TYPE_DICTIONARY:

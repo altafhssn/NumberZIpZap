@@ -6,6 +6,7 @@ signal closed
 
 @onready var sound_btn: Button = $Card/SoundBtn
 @onready var haptics_btn: Button = $Card/HapticsBtn
+@onready var tutorial_btn: Button = $Card/TutorialBtn
 @onready var reset_btn: Button = $Card/ResetBtn
 @onready var close_btn: Button = $Card/CloseBtn
 
@@ -17,8 +18,17 @@ func _ready():
 	_refresh_haptics()
 	sound_btn.pressed.connect(_on_sound)
 	haptics_btn.pressed.connect(_on_haptics)
+	tutorial_btn.pressed.connect(_on_tutorial)
 	reset_btn.pressed.connect(_on_reset)
 	close_btn.pressed.connect(_on_close)
+
+func _on_tutorial():
+	GameData.tutorial_done = false
+	GameData.selected_level = 1
+	GameData.save_game()
+	get_tree().paused = false
+	Transition.goto("res://scenes/Main.tscn")
+	queue_free()
 
 func _refresh_sound():
 	var on := GameData.sound_on

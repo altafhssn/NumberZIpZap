@@ -52,9 +52,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -180.0
-offset_top = -210.0
+offset_top = -240.0
 offset_right = 180.0
-offset_bottom = 210.0
+offset_bottom = 240.0
 theme_override_styles/panel = SubResource("card")
 
 [node name="TitleLabel" type="Label" parent="Card"]
@@ -93,11 +93,24 @@ theme_override_styles/pressed = SubResource("btn")
 theme_override_styles/focus = SubResource("btn")
 text = "📳  Haptics: On"
 
-[node name="ResetBtn" type="Button" parent="Card"]
+[node name="TutorialBtn" type="Button" parent="Card"]
 offset_left = 40.0
 offset_top = 196.0
 offset_right = 320.0
 offset_bottom = 244.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "❔  How to play"
+
+[node name="ResetBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 254.0
+offset_right = 320.0
+offset_bottom = 302.0
 theme_override_colors/font_color = Color(0.94, 0.27, 0.27, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn")
@@ -108,9 +121,9 @@ text = "↺  Reset Progress"
 
 [node name="CloseBtn" type="Button" parent="Card"]
 offset_left = 40.0
-offset_top = 300.0
+offset_top = 360.0
 offset_right = 320.0
-offset_bottom = 348.0
+offset_bottom = 408.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn")

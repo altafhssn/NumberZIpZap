@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://b0tut00zip001"]
+
+[ext_resource type="Script" path="res://scripts/Tutorial.gd" id="1_tut"]
+
+[sub_resource type="StyleBoxFlat" id="card"]
+content_margin_left = 18.0
+content_margin_top = 12.0
+content_margin_right = 18.0
+content_margin_bottom = 12.0
+bg_color = Color(0.0588235, 0.0588235, 0.137255, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.819608, 0.392157, 0.75)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 12
+
+[node name="Tutorial" type="CanvasLayer"]
+layer = 12
+script = ExtResource("1_tut")
+
+[node name="Card" type="PanelContainer" parent="."]
+offset_left = 30.0
+offset_top = 130.0
+offset_right = 450.0
+offset_bottom = 200.0
+theme_override_styles/panel = SubResource("card")
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Card"]
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "Tap dot 1 to start your path."

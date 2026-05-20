@@ -16,6 +16,7 @@ var LevelGeneratorScript = preload("res://scripts/LevelGenerator.gd")
 var GameStateScript = preload("res://scripts/GameState.gd")
 var AudioScript = preload("res://scripts/Audio.gd")
 var PauseScene = preload("res://scenes/Pause.tscn")
+var TutorialScene = preload("res://scenes/Tutorial.tscn")
 
 var audio = null
 
@@ -67,8 +68,20 @@ func _start_new_level():
 	# Update grid and HUD
 	grid.setup(data)
 	hud.update_for_level(current_level, data)
-	
+
+	# First-time tutorial on level 1
+	if current_level == 1 and not GameData.tutorial_done:
+		_show_tutorial()
+
 	emit_signal("level_loaded")
+
+func _show_tutorial():
+	if has_node("Tutorial"):
+		return
+	var t = TutorialScene.instantiate()
+	t.name = "Tutorial"
+	add_child(t)
+	t.setup(game_state)
 
 func on_cell_tapped(row: int, col: int):
 	if game_state.is_completed:
@@ -152,6 +165,9 @@ func _on_level_complete():
 	var moves_val = game_state.moves
 
 	GameData.record_result(current_level, stars)
+	if current_level == 1:
+		GameData.tutorial_done = true
+		GameData.save_game()
 	GameData.selected_level = current_level + 1
 
 	emit_signal("level_completed", stars, time_val, moves_val)

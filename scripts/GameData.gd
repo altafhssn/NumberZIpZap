@@ -15,9 +15,12 @@ func _ready():
 	load_game()
 
 func record_result(level: int, earned_stars: int):
+	# High-water-mark: only stored stars can ever rise, never accumulate.
+	# Replaying a level can improve the record but cannot double-reward.
+	var capped := clampi(earned_stars, 0, 3)
 	var prev = int(stars.get(level, 0))
-	if earned_stars > prev:
-		stars[level] = earned_stars
+	if capped > prev:
+		stars[level] = capped
 	if level + 1 > max_unlocked:
 		max_unlocked = level + 1
 	save_game()

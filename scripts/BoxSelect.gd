@@ -26,8 +26,20 @@ const BOX_TINTS := [
 func _ready():
 	Ads.show_banner()
 	back_btn.pressed.connect(func(): Transition.goto("res://scenes/Home.tscn"))
-	total_label.text = "★ %d  total stars" % _total_stars()
+	_update_total()
 	_build()
+
+func _update_total():
+	var total = _total_stars()
+	var next_thr := -1
+	for box in BOXES:
+		if total < int(box["stars"]):
+			next_thr = int(box["stars"])
+			break
+	if next_thr > 0:
+		total_label.text = "★ %d   ·   Next unlock at ★ %d" % [total, next_thr]
+	else:
+		total_label.text = "★ %d   ·   All unlocked!" % total
 
 func _total_stars() -> int:
 	var s := 0
@@ -45,25 +57,27 @@ func _build():
 
 func _make_tile(box: Dictionary, idx: int, total_stars: int) -> Control:
 	var b := Button.new()
-	b.custom_minimum_size = Vector2(0, 120)
+	b.custom_minimum_size = Vector2(0, 134)
 	b.focus_mode = Control.FOCUS_NONE
 	b.add_theme_font_size_override("font_size", 22)
 
 	var unlocked: bool = total_stars >= int(box["stars"])
 	var tint: Color = BOX_TINTS[idx]
+
+	# Background tile
 	var sb := StyleBoxFlat.new()
 	sb.set_corner_radius_all(18)
-	sb.content_margin_left = 20
-	sb.content_margin_right = 20
-	sb.content_margin_top = 14
-	sb.content_margin_bottom = 14
-	sb.bg_color = (tint.darkened(0.7) if unlocked else Color("#11112A"))
-	sb.border_width_bottom = 2
-	sb.border_width_top = 2
+	sb.content_margin_left = 22
+	sb.content_margin_right = 22
+	sb.content_margin_top = 16
+	sb.content_margin_bottom = 38   # reserve room for the progress bar at the bottom
+	sb.bg_color = (tint.darkened(0.72) if unlocked else Color("#0F0F22"))
 	sb.border_width_left = 2
+	sb.border_width_top = 2
 	sb.border_width_right = 2
-	sb.border_color = (tint if unlocked else Color("#2A2A4E"))
-	sb.shadow_color = Color(0, 0, 0, 0.35)
+	sb.border_width_bottom = 2
+	sb.border_color = (tint if unlocked else Color(tint.r, tint.g, tint.b, 0.18))
+	sb.shadow_color = Color(0, 0, 0, 0.30)
 	sb.shadow_size = 8
 	b.add_theme_stylebox_override("normal", sb)
 	b.add_theme_stylebox_override("hover", sb)
@@ -76,6 +90,7 @@ func _make_tile(box: Dictionary, idx: int, total_stars: int) -> Control:
 		earned += int(GameData.stars.get(lvl, 0))
 	var max_stars: int = (int(box["last"]) - int(box["first"]) + 1) * 3
 
+	var bar_ratio := 0.0
 	if unlocked:
 		b.text = "%d.  %s  ·  %d×%d\nLv %d–%d        ★ %d / %d" % [
 			idx + 1, box["name"], box["grid"], box["grid"],
@@ -83,12 +98,40 @@ func _make_tile(box: Dictionary, idx: int, total_stars: int) -> Control:
 		]
 		b.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 		b.pressed.connect(_on_pick.bind(box))
+		bar_ratio = float(earned) / float(maxi(1, max_stars))
 	else:
-		b.text = "🔒  %s  ·  %d×%d\nNeed ★ %d to unlock" % [
-			box["name"], box["grid"], box["grid"], int(box["stars"])
+		var to_go: int = int(box["stars"]) - total_stars
+		b.text = "🔒  %s  ·  %d×%d\nNeed ★ %d  ·  %d more to go" % [
+			box["name"], box["grid"], box["grid"], int(box["stars"]), to_go
 		]
 		b.disabled = true
-		b.add_theme_color_override("font_color_disabled", Color(0.55, 0.58, 0.78, 1))
+		b.add_theme_color_override("font_color_disabled", Color(0.62, 0.66, 0.86, 1))
+		bar_ratio = float(total_stars) / float(maxi(1, int(box["stars"])))
+
+	# Progress bar pinned to the bottom of the tile
+	var bar := ProgressBar.new()
+	bar.anchor_left = 0.0
+	bar.anchor_right = 1.0
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = 22
+	bar.offset_right = -22
+	bar.offset_top = -22
+	bar.offset_bottom = -12
+	bar.show_percentage = false
+	bar.min_value = 0.0
+	bar.max_value = 100.0
+	bar.value = clampf(bar_ratio, 0.0, 1.0) * 100.0
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color("#1A1A30")
+	bar_bg.set_corner_radius_all(5)
+	var bar_fg := StyleBoxFlat.new()
+	bar_fg.bg_color = (tint if unlocked else Color(tint.r, tint.g, tint.b, 0.55))
+	bar_fg.set_corner_radius_all(5)
+	bar.add_theme_stylebox_override("background", bar_bg)
+	bar.add_theme_stylebox_override("fill", bar_fg)
+	b.add_child(bar)
 	return b
 
 func _on_pick(box: Dictionary):

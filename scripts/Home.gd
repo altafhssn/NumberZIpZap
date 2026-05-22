@@ -21,7 +21,7 @@ func _on_play():
 	Transition.goto("res://scenes/Main.tscn")
 
 func _on_levels():
-	Transition.goto("res://scenes/LevelSelect.tscn")
+	Transition.goto("res://scenes/BoxSelect.tscn")
 
 func _on_settings():
 	if has_node("Settings"):

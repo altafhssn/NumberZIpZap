@@ -153,7 +153,7 @@ theme_override_styles/normal = SubResource("btn_ghost")
 theme_override_styles/hover = SubResource("btn_ghost_hover")
 theme_override_styles/pressed = SubResource("btn_ghost")
 theme_override_styles/focus = SubResource("btn_ghost")
-text = "▦  Level Select"
+text = "📦  Boxes"
 
 [node name="SettingsBtn" type="Button" parent="."]
 layout_mode = 1

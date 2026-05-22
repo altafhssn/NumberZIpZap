@@ -254,8 +254,9 @@ func _draw():
 	_draw_errors()
 	_draw_dots()
 
-# Faint pulsing breadcrumb following the canonical solution; only drawn during
-# the tutorial so newcomers can see the intended path.
+# Tutorial guide: dashed pulsing line from the player's current head to the
+# NEXT numbered dot along the canonical solution. Advances one number at a
+# time so newcomers see exactly where to drag next.
 func _draw_solution_hint():
 	if not show_solution_hint:
 		return
@@ -264,20 +265,54 @@ func _draw_solution_hint():
 	var sol: Array = main.game_state.solution
 	if sol.is_empty():
 		return
-	var visited: Dictionary = main.game_state.visited_cells
-	var dot_r := maxf(2.5, cell_size * 0.06)
+	var state = main.game_state
+	var player_path: Array = state.player_path
+
+	# Find where the player currently is in the solution. If they haven't
+	# started yet, the pulsing first-dot ring already guides them — bail.
+	if player_path.is_empty():
+		return
+	var last = player_path[-1]
+	var cur_idx := -1
 	for i in range(sol.size()):
-		var cell = sol[i]
-		var key := "%d,%d" % [cell[0], cell[1]]
-		if visited.has(key) or blocked_cells.has(key):
-			continue
-		if dot_positions.has(key):
-			# skip drawing crumbs over numbered dots — they're already obvious
-			continue
-		var center := _cell_center(cell[0], cell[1])
-		var col := path_end
-		col.a = 0.22 + 0.10 * sin(Time.get_ticks_msec() * 0.004 + float(i) * 0.6)
-		draw_circle(center, dot_r, col)
+		if sol[i][0] == last[0] and sol[i][1] == last[1]:
+			cur_idx = i
+			break
+	if cur_idx < 0 or cur_idx >= sol.size() - 1:
+		return
+
+	# Walk forward through the solution until we hit the next un-reached
+	# numbered dot, so the dashed line ends exactly on it.
+	var end_idx := cur_idx
+	var visited: Dictionary = state.visited_cells
+	for j in range(cur_idx + 1, sol.size()):
+		end_idx = j
+		var key := "%d,%d" % [sol[j][0], sol[j][1]]
+		if dot_positions.has(key) and not visited.has(key):
+			break
+
+	var w := maxf(2.0, cell_size * 0.08)
+	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.005)
+	var col := path_end
+	col.a = lerp(0.30, 0.60, pulse)
+	var dash := cell_size * 0.14
+	var gap := cell_size * 0.10
+	for i in range(cur_idx, end_idx):
+		var a := _cell_center(sol[i][0], sol[i][1])
+		var b := _cell_center(sol[i + 1][0], sol[i + 1][1])
+		_draw_dashed(a, b, w, col, dash, gap)
+
+func _draw_dashed(a: Vector2, b: Vector2, width: float, color: Color, dash: float, gap: float):
+	var diff := b - a
+	var length := diff.length()
+	if length < 0.5:
+		return
+	var dir := diff / length
+	var t := 0.0
+	while t < length:
+		var t2 := minf(t + dash, length)
+		draw_line(a + dir * t, a + dir * t2, color, width, true)
+		t = t2 + gap
 
 func _draw_round_rect(rect: Rect2, radius: float, color: Color, width: float = -1.0):
 	radius = minf(radius, minf(rect.size.x, rect.size.y) / 2.0)

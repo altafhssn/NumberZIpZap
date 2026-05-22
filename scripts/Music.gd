@@ -40,15 +40,19 @@ func _update():
 # All partial + LFO frequencies snapped to integer multiples of 1/L so the
 # buffer is perfectly periodic — a click-free loop.
 func _make_music() -> AudioStreamWAV:
-	var L := 10.0
+	var L := 12.0
 	var count := int(RATE * L)
 	var base := 1.0 / L
+	# D-minor pad with light shimmer — calmer, more contemplative than the
+	# A-major drone. Partial layout: D2, F2, A2, D3, F3, A3, F4 + air at A4.
 	var partials := [
-		[110.0, 0.24, 0.05, 0.5],
-		[164.81, 0.18, 0.07, 0.6],
-		[220.0, 0.16, 0.06, 0.6],
-		[277.18, 0.12, 0.083, 0.7],
-		[329.63, 0.09, 0.11, 0.7],
+		[73.42,  0.22, 0.041, 0.45],   # D2 root
+		[87.31,  0.18, 0.058, 0.55],   # F2
+		[110.0,  0.14, 0.067, 0.55],   # A2
+		[146.83, 0.13, 0.083, 0.60],   # D3
+		[174.61, 0.10, 0.10,  0.65],   # F3
+		[220.0,  0.07, 0.125, 0.70],   # A3
+		[349.23, 0.05, 0.15,  0.80],   # F4 shimmer
 	]
 	var tuned := []
 	var norm := 0.0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dclv3ds6pj3xw"]
+[gd_scene load_steps=12 format=3 uid="uid://dclv3ds6pj3xw"]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_06h2c"]
 [ext_resource type="Script" path="res://scripts/Grid.gd" id="2_yhxsb"]
@@ -69,6 +69,25 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
+[sub_resource type="StyleBoxFlat" id="bar_bg"]
+bg_color = Color(0.117647, 0.117647, 0.227451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.180392, 0.180392, 0.317647, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="bar_fg"]
+bg_color = Color(0.96, 0.62, 0.16, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [sub_resource type="StyleBoxFlat" id="panel_complete"]
 bg_color = Color(0.054902, 0.054902, 0.137255, 0.97)
 border_width_left = 1
@@ -95,24 +114,37 @@ script = ExtResource("3_7kwsy")
 
 [node name="LevelLabel" type="Label" parent="HUD"]
 offset_left = 20.0
-offset_top = 26.0
+offset_top = 22.0
 offset_right = 460.0
 offset_bottom = 58.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
-theme_override_font_sizes/font_size = 18
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/shadow_outline_size = 10
+theme_override_colors/font_shadow_color = Color(0.262745, 0.380392, 0.933333, 0.45)
+theme_override_font_sizes/font_size = 22
 text = "ZipPath"
 horizontal_alignment = 1
 
+[node name="FillBar" type="ProgressBar" parent="HUD"]
+offset_left = 110.0
+offset_top = 66.0
+offset_right = 370.0
+offset_bottom = 78.0
+min_value = 0.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+theme_override_styles/background = SubResource("bar_bg")
+theme_override_styles/fill = SubResource("bar_fg")
+
 [node name="FillLabel" type="Label" parent="HUD"]
 offset_left = 20.0
-offset_top = 60.0
+offset_top = 82.0
 offset_right = 460.0
-offset_bottom = 84.0
+offset_bottom = 100.0
 theme_override_colors/font_color = Color(0.55, 0.58, 0.78, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "0% filled"
 horizontal_alignment = 1
 

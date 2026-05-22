@@ -7,6 +7,7 @@ extends CanvasLayer
 # UI References
 @onready var level_label = $LevelLabel
 @onready var fill_label = $FillLabel
+@onready var fill_bar: ProgressBar = $FillBar
 @onready var undo_btn = $UndoBtn
 @onready var reset_btn = $ResetBtn
 @onready var hint_btn = $HintBtn
@@ -60,6 +61,8 @@ func update_for_level(level_num: int, level_data: Dictionary):
 	var pack_name = _get_pack_name(level_num)
 	
 	continue_btn.visible = false
+	if fill_bar:
+		fill_bar.value = 0
 	level_label.text = "%s – Level %d" % [pack_name, level_num]
 	fill_label.text = "Connect 1→%d · fill every cell" % level_data.get("dots", []).size()
 	
@@ -71,6 +74,8 @@ func update_stats(state):
 	continue_btn.visible = false
 	var fill_pct = int(state.get_fill_pct())
 	var next_dot = state.get_next_dot_number()
+	if fill_bar:
+		fill_bar.value = fill_pct
 
 	if next_dot == -1 and fill_pct < 100:
 		# All dots linked but grid not full — this is the common confusion point

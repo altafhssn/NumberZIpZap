@@ -26,9 +26,9 @@ script = ExtResource("1_tut")
 
 [node name="Card" type="PanelContainer" parent="."]
 offset_left = 30.0
-offset_top = 86.0
+offset_top = 108.0
 offset_right = 450.0
-offset_bottom = 150.0
+offset_bottom = 162.0
 theme_override_styles/panel = SubResource("card")
 mouse_filter = 2
 

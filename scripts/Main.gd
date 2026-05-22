@@ -69,8 +69,9 @@ func _start_new_level():
 	grid.setup(data)
 	hud.update_for_level(current_level, data)
 
-	# First-time tutorial on level 1
-	if current_level == 1 and not GameData.tutorial_done:
+	# Tutorial on level 1: show if flag is off, or if the player still hasn't
+	# unlocked anything past level 1 (safety net for a stuck flag).
+	if current_level == 1 and (not GameData.tutorial_done or GameData.max_unlocked <= 1):
 		_show_tutorial()
 
 	emit_signal("level_loaded")

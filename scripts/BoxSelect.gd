@@ -5,10 +5,10 @@ extends Control
 
 const BOXES := [
 	{"name": "Spark",    "grid": 5, "first": 1,  "last": 10, "stars": 0},
-	{"name": "Glow",     "grid": 6, "first": 11, "last": 20, "stars": 8},
-	{"name": "Ember",    "grid": 7, "first": 21, "last": 30, "stars": 20},
-	{"name": "Nova",     "grid": 8, "first": 31, "last": 40, "stars": 36},
-	{"name": "Infinite", "grid": 9, "first": 41, "last": 80, "stars": 60},
+	{"name": "Glow",     "grid": 6, "first": 11, "last": 20, "stars": 18},
+	{"name": "Ember",    "grid": 7, "first": 21, "last": 30, "stars": 40},
+	{"name": "Nova",     "grid": 8, "first": 31, "last": 40, "stars": 65},
+	{"name": "Infinite", "grid": 9, "first": 41, "last": 80, "stars": 95},
 ]
 
 const BOX_TINTS := [

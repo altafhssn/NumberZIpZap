@@ -11,21 +11,38 @@ func generate(grid_size: int, dot_count: int, seed_val: int = -1, block_count: i
 	else:
 		randomize()
 
-	# Step 1: Hamiltonian path over the whole grid
-	var full = _find_hamiltonian_path(grid_size)
-	if full.is_empty():
-		push_error("LevelGenerator: Failed to generate Hamiltonian path for grid ", grid_size)
-		return {}
-
-	# Step 2: Block off the tail cells of the path. The remaining prefix is
-	# still a valid Hamiltonian path over exactly the non-blocked cells, so
-	# the level stays solvable; backbite randomises where the tail lands.
-	var b = clampi(block_count, 0, full.size() - maxi(dot_count, 2) - 1)
+	# Step 1: Choose blocks (scattered, non-adjacent) and find a Hamiltonian
+	# path over the remaining cells. If that fails, fall back to a fast
+	# tail-trim of a full Hamiltonian path (always solvable, but blocks land
+	# in a line). Blockless levels skip this entirely.
 	var blocked: Array = []
-	var path = full
+	var path: Array = []
+	var b: int = block_count
 	if b > 0:
-		blocked = full.slice(full.size() - b, full.size())
-		path = full.slice(0, full.size() - b)
+		var max_b := grid_size * grid_size - maxi(dot_count, 2) - 1
+		b = clampi(b, 0, max_b)
+		var ok := false
+		for outer in range(8):
+			var cand_blocks := _pick_scattered_blocks(grid_size, b)
+			if cand_blocks.size() < b:
+				continue
+			var cand_path := _find_hamiltonian_with_blocks(grid_size, cand_blocks)
+			if not cand_path.is_empty():
+				blocked = cand_blocks
+				path = cand_path
+				ok = true
+				break
+		if not ok:
+			# Fallback: take tail cells of a full path (will be chain-adjacent
+			# but guarantees a solvable level so the player isn't stuck).
+			var full = _find_hamiltonian_path(grid_size)
+			blocked = full.slice(full.size() - b, full.size())
+			path = full.slice(0, full.size() - b)
+	else:
+		path = _find_hamiltonian_path(grid_size)
+	if path.is_empty():
+		push_error("LevelGenerator: Failed to generate path for grid ", grid_size)
+		return {}
 
 	# Step 3: Place dots along the (non-blocked) solution path
 	var dots = _place_dots(path, dot_count, grid_size)
@@ -108,6 +125,43 @@ func _find_hamiltonian_path(grid_size: int) -> Array:
 
 	return path
 
+
+# Pick `count` cells that are at least 2 Manhattan steps apart from each other.
+func _pick_scattered_blocks(grid_size: int, count: int) -> Array:
+	var blocks: Array = []
+	var attempts := 0
+	while blocks.size() < count and attempts < 500:
+		attempts += 1
+		var c := Vector2(randi() % grid_size, randi() % grid_size)
+		var ok := true
+		for b in blocks:
+			if abs(c.x - b.x) + abs(c.y - b.y) <= 1:
+				ok = false
+				break
+		if ok:
+			blocks.append(c)
+	return blocks
+
+# Hamiltonian path over (grid \ blocks) via Warnsdorff DFS, multi-restart.
+# Pre-marks blocked cells as visited so the DFS treats them as obstacles.
+func _find_hamiltonian_with_blocks(grid_size: int, blocked: Array) -> Array:
+	var target := grid_size * grid_size - blocked.size()
+	if target <= 0:
+		return []
+	var blocked_dict := {}
+	for bb in blocked:
+		blocked_dict[bb] = true
+	var attempts := 0
+	while attempts < 25:
+		attempts += 1
+		var start := Vector2(randi() % grid_size, randi() % grid_size)
+		if blocked_dict.has(start):
+			continue
+		var visited: Dictionary = blocked_dict.duplicate()
+		var path: Array = []
+		if _dfs(start, grid_size, visited, path, target):
+			return path
+	return []
 
 # DFS with Warnsdorff heuristic
 func _dfs(pos: Vector2, grid_size: int, visited: Dictionary, path: Array, total_cells: int) -> bool:

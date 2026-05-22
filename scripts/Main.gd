@@ -82,7 +82,7 @@ func _show_tutorial():
 	var t = TutorialScene.instantiate()
 	t.name = "Tutorial"
 	add_child(t)
-	t.setup(game_state)
+	t.setup(game_state, grid)
 
 func on_cell_tapped(row: int, col: int):
 	if game_state.is_completed:

@@ -8,17 +8,21 @@ extends CanvasLayer
 @onready var label: Label = $Card/Label
 
 var _state = null    # GameState ref
+var _grid = null     # Grid ref (for the dotted hint trail)
 var _step := -1
 
 const STEPS := [
-	"Tap dot ① to start your path.",
-	"Drag through adjacent cells to dot ②.",
-	"Connect every number in order.",
-	"Fill every cell — end on the last number to win!",
+	"Tap dot ① to start. Follow the dotted trail.",
+	"Drag through adjacent cells to reach dot ②.",
+	"Hit every number in order — keep the highest for last.",
+	"Fill every cell and end on the highest number to win!",
 ]
 
-func setup(game_state):
+func setup(game_state, grid_ref):
 	_state = game_state
+	_grid = grid_ref
+	if _grid:
+		_grid.show_solution_hint = true
 	_show(0)
 
 func _process(_dt):
@@ -50,6 +54,9 @@ func _dismiss():
 	if not is_inside_tree():
 		return
 	_state = null
+	if _grid:
+		_grid.show_solution_hint = false
+		_grid = null
 	var t := create_tween()
 	t.tween_property(card, "modulate:a", 0.0, 0.35)
 	await t.finished

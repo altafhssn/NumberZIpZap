@@ -15,6 +15,7 @@ var cells: Dictionary = {}      # "r,c" -> {"fill_color": Color, "is_dot": bool,
 var path_cells: Array = []      # [[r,c], ...] in order placed
 var dot_positions: Dictionary = {}  # "r,c" -> int (dot number)
 var blocked_cells: Dictionary = {}  # "r,c" -> true (impassable)
+var show_solution_hint: bool = false  # tutorial-only breadcrumb trail
 var solution_dots: Array = []   # Full dot data from level
 
 # Hint
@@ -246,11 +247,37 @@ func _draw():
 		return
 	_draw_background()
 	_draw_grid_background()
+	_draw_solution_hint()
 	_draw_path()
 	_draw_ripples()
 	_draw_hint()
 	_draw_errors()
 	_draw_dots()
+
+# Faint pulsing breadcrumb following the canonical solution; only drawn during
+# the tutorial so newcomers can see the intended path.
+func _draw_solution_hint():
+	if not show_solution_hint:
+		return
+	if main == null or main.game_state == null:
+		return
+	var sol: Array = main.game_state.solution
+	if sol.is_empty():
+		return
+	var visited: Dictionary = main.game_state.visited_cells
+	var dot_r := maxf(2.5, cell_size * 0.06)
+	for i in range(sol.size()):
+		var cell = sol[i]
+		var key := "%d,%d" % [cell[0], cell[1]]
+		if visited.has(key) or blocked_cells.has(key):
+			continue
+		if dot_positions.has(key):
+			# skip drawing crumbs over numbered dots — they're already obvious
+			continue
+		var center := _cell_center(cell[0], cell[1])
+		var col := path_end
+		col.a = 0.22 + 0.10 * sin(Time.get_ticks_msec() * 0.004 + float(i) * 0.6)
+		draw_circle(center, dot_r, col)
 
 func _draw_round_rect(rect: Rect2, radius: float, color: Color, width: float = -1.0):
 	radius = minf(radius, minf(rect.size.x, rect.size.y) / 2.0)

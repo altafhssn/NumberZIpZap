@@ -2,6 +2,9 @@
 # UI overlay: level info, fill counter, undo/reset/hint buttons, completion
 extends CanvasLayer
 
+const SectorThemesScript = preload("res://scripts/SectorThemes.gd")
+const StarBadgeScript = preload("res://scripts/StarBadge.gd")
+
 @onready var main = get_parent()
 
 # UI References
@@ -88,6 +91,32 @@ func update_stats(state):
 	# Update hint count
 	hint_count.text = "💡 %d" % state.hints_used
 
+# Hint counter badge — hints used this level (resets at level start).
+func update_hint_badge(count: int):
+	if hint_count:
+		hint_count.text = "💡 %d" % count
+
+# Non-blocking toast that fades in/out near the bottom of the screen.
+var _toast: Label = null
+func show_toast(text: String):
+	if _toast == null or not is_instance_valid(_toast):
+		_toast = Label.new()
+		_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_toast.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_toast.anchor_left = 0.0
+		_toast.anchor_right = 1.0
+		_toast.anchor_top = 0.86
+		_toast.anchor_bottom = 0.92
+		_toast.add_theme_color_override("font_color", Color(1, 0.92, 0.7, 1))
+		_toast.add_theme_font_size_override("font_size", 18)
+		add_child(_toast)
+	_toast.text = text
+	_toast.modulate = Color(1, 1, 1, 0)
+	var tw = create_tween()
+	tw.tween_property(_toast, "modulate:a", 1.0, 0.2)
+	tw.tween_interval(2.6)
+	tw.tween_property(_toast, "modulate:a", 0.0, 0.4)
+
 func show_fail(message: String):
 	fill_label.text = "%s — Undo or Reset" % message
 	fill_label.add_theme_color_override("font_color", Color(0.94, 0.27, 0.27, 1))
@@ -95,19 +124,11 @@ func show_fail(message: String):
 
 func show_complete(stars: int, time_sec: float, moves: int):
 	complete_panel.visible = true
-	
-	var star_text = ""
-	for i in range(3):
-		if i < stars:
-			star_text += "⭐"
-		else:
-			star_text += "☆"
-	stars_label.text = star_text
-	
+
 	var mins = int(time_sec) / 60
 	var secs = int(time_sec) % 60
 	stats_label.text = "Time: %d:%02d  |  Moves: %d" % [mins, secs, moves]
-	
+
 	# Panel pops in with a slight overshoot
 	complete_panel.pivot_offset = complete_panel.size / 2.0
 	complete_panel.modulate = Color(1, 1, 1, 0)
@@ -117,17 +138,51 @@ func show_complete(stars: int, time_sec: float, moves: int):
 	tw.tween_property(complete_panel, "scale", Vector2.ONE, 0.45) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-	# Stars pop in one-by-one
-	stars_label.pivot_offset = stars_label.size / 2.0
-	stars_label.scale = Vector2(0.2, 0.2)
-	var st = create_tween()
-	st.tween_interval(0.25)
-	st.tween_property(stars_label, "scale", Vector2(1.15, 1.15), 0.18) \
-		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	st.tween_property(stars_label, "scale", Vector2.ONE, 0.12)
+	# Stars: replace the text-based ⭐⭐☆ with three individually animated
+	# Labels so each star pops in with overshoot scale and stagger — much
+	# more rewarding than scaling the whole row at once.
+	_show_animated_stars(stars)
 
 	if stars > 0:
 		_burst(stars)
+
+func _show_animated_stars(stars: int):
+	# Clear any previous animated stars (e.g. on level replay).
+	for c in stars_label.get_children():
+		c.queue_free()
+	stars_label.text = ""
+
+	# HBox centres the three star badges across the StarsLabel rect.
+	var hbox := HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 8)
+	hbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stars_label.add_child(hbox)
+
+	var badges: Array = []
+	for i in range(3):
+		var b: Control = StarBadgeScript.new()
+		b.earned = i < stars
+		b.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hbox.add_child(b)
+		badges.append(b)
+
+	# Wait one frame so HBoxContainer assigns sizes, then animate each star
+	# with overshoot scale → settle. Staggered so they land in sequence and
+	# unearned stars get a smaller, gentler "miss" animation.
+	await get_tree().process_frame
+	for i in range(badges.size()):
+		var b: Control = badges[i]
+		b.pivot_offset = b.size * 0.5
+		b.scale = Vector2(0.1, 0.1)
+		var peak: Vector2 = Vector2(1.55, 1.55) if b.earned else Vector2(1.15, 1.15)
+		var t := create_tween()
+		t.tween_interval(0.20 + float(i) * 0.20)
+		t.tween_property(b, "scale", peak, 0.24) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		t.tween_property(b, "scale", Vector2.ONE, 0.22) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 
 func _burst(stars: int):
 	var p := CPUParticles2D.new()
@@ -174,6 +229,4 @@ func _on_home_pressed():
 		main.on_home()
 
 func _get_pack_name(level_num: int) -> String:
-	var packs = ["Tutorial", "Sunrise", "Nebula", "Void", "Nova", "Singularity", "Infinite"]
-	var idx = mini((level_num - 1) / 40, packs.size() - 1)
-	return packs[idx]
+	return SectorThemesScript.get_pack_name(SectorThemesScript.get_pack_index_for_level(level_num))

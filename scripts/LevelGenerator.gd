@@ -22,7 +22,7 @@ func generate(grid_size: int, dot_count: int, seed_val: int = -1, block_count: i
 		var max_b := grid_size * grid_size - maxi(dot_count, 2) - 1
 		b = clampi(b, 0, max_b)
 		var ok := false
-		for outer in range(8):
+		for outer in range(4):
 			var cand_blocks := _pick_scattered_blocks(grid_size, b)
 			if cand_blocks.size() < b:
 				continue
@@ -142,6 +142,16 @@ func _pick_scattered_blocks(grid_size: int, count: int) -> Array:
 			blocks.append(c)
 	return blocks
 
+# DFS budget: caps how many nodes a single Warnsdorff DFS attempt may expand
+# before giving up. Warnsdorff finds a tour in ~`target` steps when it works;
+# when it doesn't, unbounded backtracking over a holey grid is near-exponential
+# and will hang the game (this was the freeze on level 11+, the first levels
+# with blocks). Bounding it lets a bad seed fail fast and fall back to the
+# guaranteed-solvable tail-trim path instead of locking up.
+var _dfs_steps := 0
+var _dfs_budget := 0
+var _dfs_aborted := false
+
 # Hamiltonian path over (grid \ blocks) via Warnsdorff DFS, multi-restart.
 # Pre-marks blocked cells as visited so the DFS treats them as obstacles.
 func _find_hamiltonian_with_blocks(grid_size: int, blocked: Array) -> Array:
@@ -151,23 +161,31 @@ func _find_hamiltonian_with_blocks(grid_size: int, blocked: Array) -> Array:
 	var blocked_dict := {}
 	for bb in blocked:
 		blocked_dict[bb] = true
+	_dfs_budget = maxi(1000, target * 25)
 	var attempts := 0
-	while attempts < 25:
+	while attempts < 12:
 		attempts += 1
 		var start := Vector2(randi() % grid_size, randi() % grid_size)
 		if blocked_dict.has(start):
 			continue
 		var visited: Dictionary = blocked_dict.duplicate()
 		var path: Array = []
+		_dfs_steps = 0
+		_dfs_aborted = false
 		if _dfs(start, grid_size, visited, path, target):
 			return path
 	return []
 
 # DFS with Warnsdorff heuristic
 func _dfs(pos: Vector2, grid_size: int, visited: Dictionary, path: Array, total_cells: int) -> bool:
+	_dfs_steps += 1
+	if _dfs_steps > _dfs_budget:
+		_dfs_aborted = true
+		return false
+
 	visited[pos] = true
 	path.append(pos)
-	
+
 	if path.size() == total_cells:
 		return true  # All cells visited
 	
@@ -207,7 +225,12 @@ func _dfs(pos: Vector2, grid_size: int, visited: Dictionary, path: Array, total_
 	for nbr in shuffled:
 		if _dfs(nbr, grid_size, visited, path, total_cells):
 			return true
-	
+		if _dfs_aborted:
+			# Budget exhausted — unwind without further exploration.
+			visited.erase(pos)
+			path.pop_back()
+			return false
+
 	# Backtrack
 	visited.erase(pos)
 	path.pop_back()

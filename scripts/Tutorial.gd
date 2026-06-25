@@ -31,15 +31,22 @@ func _process(_dt):
 	if _state.is_completed:
 		_dismiss()
 		return
+	# Step is DERIVED from current progress every frame, not monotonically
+	# advanced. Without this, pressing Reset (or Undo past a dot) leaves the
+	# card stuck on whatever the highest-ever step was — e.g. you reach all
+	# six dots, hit Reset, and the card still preaches "Fill every cell" on
+	# an empty grid. Re-derive so it tracks state both forward AND backward.
 	var nd: int = _state.next_dot_index
 	var dots_total: int = _state.dots.size()
-	# Auto-advance based on progress
-	if _step == 0 and nd >= 1:
-		_show(1)
-	elif _step == 1 and nd >= 2:
-		_show(2)
-	elif _step == 2 and nd >= dots_total:
-		_show(3)
+	var desired := 0
+	if nd >= 1:
+		desired = 1
+	if nd >= 2:
+		desired = 2
+	if nd >= dots_total:
+		desired = 3
+	if desired != _step:
+		_show(desired)
 
 func _show(i: int):
 	if i == _step:

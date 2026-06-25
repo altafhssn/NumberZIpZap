@@ -3,21 +3,24 @@
 # requires a minimum total stars to unlock.
 extends Control
 
+const SectorThemesScript = preload("res://scripts/SectorThemes.gd")
+
 const BOXES := [
+	# DEV: star gates set to 0 so all boxes are accessible for testing.
+	# Restore (0, 18, 40, 65, 95) before shipping.
 	{"name": "Spark",    "grid": 5, "first": 1,  "last": 10, "stars": 0},
-	{"name": "Glow",     "grid": 6, "first": 11, "last": 20, "stars": 18},
-	{"name": "Ember",    "grid": 7, "first": 21, "last": 30, "stars": 40},
-	{"name": "Nova",     "grid": 8, "first": 31, "last": 40, "stars": 65},
-	{"name": "Infinite", "grid": 9, "first": 41, "last": 80, "stars": 95},
+	{"name": "Glow",     "grid": 6, "first": 11, "last": 20, "stars": 0},
+	{"name": "Ember",    "grid": 7, "first": 21, "last": 30, "stars": 0},
+	{"name": "Nova",     "grid": 8, "first": 31, "last": 40, "stars": 0},
+	{"name": "Infinite", "grid": 9, "first": 41, "last": 80, "stars": 0},
 ]
 
-const BOX_TINTS := [
-	Color("#FFC04D"),  # amber
-	Color("#F97316"),  # orange
-	Color("#EF4444"),  # red
-	Color("#8B5CF6"),  # violet
-	Color("#06D6A0"),  # teal
-]
+# Tints come from SectorThemes so the card border, the level-select label, and
+# the in-level palette all stay in lockstep. Each box's index matches the
+# sector index in SectorThemes.PACK_NAMES.
+static func _tint_for(box_index: int) -> Color:
+	var t: Dictionary = SectorThemesScript.get_theme(box_index, 1)
+	return t.get("swatch", Color.WHITE)
 
 @onready var grid: VBoxContainer = $Scroll/List
 @onready var back_btn: Button = $BackBtn
@@ -62,7 +65,7 @@ func _make_tile(box: Dictionary, idx: int, total_stars: int) -> Control:
 	b.add_theme_font_size_override("font_size", 22)
 
 	var unlocked: bool = total_stars >= int(box["stars"])
-	var tint: Color = BOX_TINTS[idx]
+	var tint: Color = _tint_for(idx)
 
 	# Background tile
 	var sb := StyleBoxFlat.new()

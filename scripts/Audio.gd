@@ -13,6 +13,7 @@ var _s_dot: AudioStreamWAV
 var _s_error: AudioStreamWAV
 var _s_win: AudioStreamWAV
 var _s_fail: AudioStreamWAV
+var _s_lock: AudioStreamWAV
 
 func _ready():
 	# Small pool so overlapping moves don't cut each other off
@@ -27,12 +28,15 @@ func _ready():
 	_s_error = _tone([{ "f": 200.0, "to": 130.0 }], 0.20, 0.40, "square")
 	_s_fail = _tone([{ "f": 440.0, "to": 110.0 }], 0.45, 0.42, "tri")
 	_s_win = _arp([523.25, 659.25, 783.99, 1046.5], 0.12, 0.40)
+	# Short bright pluck for the auto-lock snap (~80ms), fired just before win.
+	_s_lock = _tone([{ "f": 880.0, "to": 1318.5 }], 0.08, 0.5, "sine")
 
 func play_move(): _play(_s_move)
 func play_dot(): _play(_s_dot)
 func play_error(): _play(_s_error)
 func play_win(): _play(_s_win)
 func play_fail(): _play(_s_fail)
+func play_lock(): _play(_s_lock)
 
 func _play(stream: AudioStreamWAV):
 	if stream == null:

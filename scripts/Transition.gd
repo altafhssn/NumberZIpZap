@@ -38,3 +38,20 @@ func goto(path: String, dur: float = 0.28):
 
 	_rect.visible = false
 	_busy = false
+
+# Sector warp: brief full-screen sweep in the new pack's accent color, used
+# when a level advance crosses a pack boundary. Non-blocking — does not change
+# scenes, just plays the visual flourish on top of the current scene.
+func sector_warp(accent: Color, dur: float = 0.6):
+	var sweep := ColorRect.new()
+	sweep.color = accent
+	sweep.set_anchors_preset(Control.PRESET_FULL_RECT)
+	sweep.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sweep.modulate.a = 0.0
+	add_child(sweep)
+	var tw := create_tween()
+	# Quick flash in, slower fade out — feels like passing through a portal.
+	tw.tween_property(sweep, "modulate:a", 0.65, dur * 0.30)
+	tw.tween_property(sweep, "modulate:a", 0.0, dur * 0.70)
+	await tw.finished
+	sweep.queue_free()

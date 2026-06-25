@@ -228,9 +228,9 @@ vertical_alignment = 1
 [node name="CompletePanel" type="Panel" parent="HUD"]
 visible = false
 offset_left = 40.0
-offset_top = 230.0
+offset_top = 215.0
 offset_right = 440.0
-offset_bottom = 590.0
+offset_bottom = 635.0
 theme_override_styles/panel = SubResource("panel_complete")
 
 [node name="TitleLabel" type="Label" parent="HUD/CompletePanel"]
@@ -245,9 +245,9 @@ horizontal_alignment = 1
 
 [node name="StarsLabel" type="Label" parent="HUD/CompletePanel"]
 offset_left = 40.0
-offset_top = 64.0
+offset_top = 70.0
 offset_right = 360.0
-offset_bottom = 118.0
+offset_bottom = 170.0
 theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
 theme_override_font_sizes/font_size = 40
 text = "☆ ☆ ☆"
@@ -255,9 +255,9 @@ horizontal_alignment = 1
 
 [node name="StatsLabel" type="Label" parent="HUD/CompletePanel"]
 offset_left = 40.0
-offset_top = 130.0
+offset_top = 184.0
 offset_right = 360.0
-offset_bottom = 160.0
+offset_bottom = 214.0
 theme_override_colors/font_color = Color(0.55, 0.58, 0.78, 1)
 theme_override_font_sizes/font_size = 14
 text = "Time: 0:00  |  Moves: 0"
@@ -265,9 +265,9 @@ horizontal_alignment = 1
 
 [node name="NextBtn" type="Button" parent="HUD/CompletePanel"]
 offset_left = 50.0
-offset_top = 184.0
+offset_top = 238.0
 offset_right = 350.0
-offset_bottom = 232.0
+offset_bottom = 286.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("btn_accent")
@@ -278,9 +278,9 @@ text = "▶  Next Level"
 
 [node name="ReplayBtn" type="Button" parent="HUD/CompletePanel"]
 offset_left = 50.0
-offset_top = 242.0
+offset_top = 296.0
 offset_right = 350.0
-offset_bottom = 290.0
+offset_bottom = 344.0
 theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn_normal")
@@ -291,9 +291,9 @@ text = "⟳  Replay Level"
 
 [node name="HomeBtn" type="Button" parent="HUD/CompletePanel"]
 offset_left = 120.0
-offset_top = 304.0
+offset_top = 364.0
 offset_right = 280.0
-offset_bottom = 342.0
+offset_bottom = 402.0
 theme_override_colors/font_color = Color(0.55, 0.58, 0.78, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("btn_normal")

@@ -136,6 +136,7 @@ jobs:
           mkdir -p "$key_dir"
           printf '%s' "$ASC_PRIVATE_KEY_BASE64" | base64 --decode > "$key_path"
           chmod 600 "$key_path"
+          openssl pkey -in "$key_path" -noout
           echo "ASC_KEY_PATH=$key_path" >> "$GITHUB_ENV"
 
       - name: Archive signed iOS app

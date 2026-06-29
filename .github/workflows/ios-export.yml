@@ -1,0 +1,94 @@
+name: Export iOS Xcode project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-export-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.2
+  GODOT_RELEASE: stable
+  GODOT_TEMPLATE_DIR: 4.6.2.stable
+
+jobs:
+  export-xcode-project:
+    name: Godot iOS export
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+
+      - name: Cache Godot and export templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-ci
+            ~/Library/Application Support/Godot/export_templates/${{ env.GODOT_TEMPLATE_DIR }}
+          key: godot-macos-${{ env.GODOT_VERSION }}-ios
+
+      - name: Install Godot and export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          GODOT_HOME="$HOME/godot-ci"
+          GODOT_APP="$GODOT_HOME/Godot.app"
+          GODOT_BIN="$GODOT_APP/Contents/MacOS/Godot"
+          TEMPLATE_HOME="$HOME/Library/Application Support/Godot/export_templates/$GODOT_TEMPLATE_DIR"
+
+          mkdir -p "$GODOT_HOME" "$TEMPLATE_HOME"
+
+          if [[ ! -x "$GODOT_BIN" ]]; then
+            curl --fail --location --retry 3 \
+              --output "$RUNNER_TEMP/godot.zip" \
+              "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_macos.universal.zip"
+            unzip -q "$RUNNER_TEMP/godot.zip" -d "$GODOT_HOME"
+            chmod +x "$GODOT_BIN"
+            xattr -dr com.apple.quarantine "$GODOT_APP" 2>/dev/null || true
+          fi
+
+          if [[ ! -f "$TEMPLATE_HOME/ios.zip" ]]; then
+            curl --fail --location --retry 3 \
+              --output "$RUNNER_TEMP/templates.tpz" \
+              "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-${GODOT_RELEASE}/Godot_v${GODOT_VERSION}-${GODOT_RELEASE}_export_templates.tpz"
+            rm -rf "$RUNNER_TEMP/godot-templates"
+            unzip -q "$RUNNER_TEMP/templates.tpz" -d "$RUNNER_TEMP/godot-templates"
+            cp -R "$RUNNER_TEMP/godot-templates/templates/." "$TEMPLATE_HOME/"
+          fi
+
+          echo "$GODOT_APP/Contents/MacOS" >> "$GITHUB_PATH"
+
+      - name: Show tool versions
+        shell: bash
+        run: |
+          Godot --version
+          xcodebuild -version
+
+      - name: Import Godot resources
+        shell: bash
+        run: Godot --headless --editor --path "$GITHUB_WORKSPACE" --import
+
+      - name: Export Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$GITHUB_WORKSPACE/build/ios"
+          mkdir -p "$GITHUB_WORKSPACE/build/ios"
+          Godot --headless --path "$GITHUB_WORKSPACE" \
+            --export-release "iOS" "$GITHUB_WORKSPACE/build/ios/ZipPath.zip"
+          test -s "$GITHUB_WORKSPACE/build/ios/ZipPath.zip"
+
+      - name: Upload Xcode project
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZipPath-iOS-Xcode-project
+          path: build/ios/ZipPath.zip
+          if-no-files-found: error
+          retention-days: 7

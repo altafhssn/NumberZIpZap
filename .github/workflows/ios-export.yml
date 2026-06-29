@@ -87,19 +87,24 @@ jobs:
           # The iOS export itself is valid when the expected ZIP was produced.
           set +e
           Godot --headless --path "$GITHUB_WORKSPACE" \
-            --export-release "iOS" "$GITHUB_WORKSPACE/build/ios/ZipPath.zip"
+            --export-release "iOS" "$GITHUB_WORKSPACE/build/ios/ZipPath"
           godot_status=$?
           set -e
 
-          test -s "$GITHUB_WORKSPACE/build/ios/ZipPath.zip"
+          test -s "$GITHUB_WORKSPACE/build/ios/ZipPath.xcodeproj/project.pbxproj"
           if [[ $godot_status -ne 0 ]]; then
             echo "Godot exited with $godot_status after creating the iOS export; continuing."
           fi
+
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$GITHUB_WORKSPACE/build/ios" \
+            "$GITHUB_WORKSPACE/build/ZipPath-iOS-Xcode-project.zip"
+          test -s "$GITHUB_WORKSPACE/build/ZipPath-iOS-Xcode-project.zip"
 
       - name: Upload Xcode project
         uses: actions/upload-artifact@v4
         with:
           name: ZipPath-iOS-Xcode-project
-          path: build/ios/ZipPath.zip
+          path: build/ZipPath-iOS-Xcode-project.zip
           if-no-files-found: error
           retention-days: 7

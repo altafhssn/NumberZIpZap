@@ -1,0 +1,35 @@
+# Godot-generated data
+.godot/
+
+# Exported builds
+Build/
+builds/
+ios_build/
+
+# Android generated files and local machine configuration
+android/build/.gradle/
+android/build/.kotlin/
+android/build/build/
+android/build/libs/debug/
+android/build/libs/release/
+android/build/local.properties
+android/build/assetPackInstallTime/build/
+android/build/assetPackInstallTime/src/main/assets/
+
+# Signing keys and Apple credentials
+*.keystore
+*.jks
+*.p12
+*.cer
+*.mobileprovision
+AuthKey_*.p8
+export_credentials.cfg
+
+# Editor and operating-system files
+.agents/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+

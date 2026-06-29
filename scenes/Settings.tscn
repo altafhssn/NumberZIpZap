@@ -1,0 +1,191 @@
+[gd_scene load_steps=7 format=3 uid="uid://b0set00zip001"]
+
+[ext_resource type="Script" path="res://scripts/Settings.gd" id="1_set"]
+
+[sub_resource type="StyleBoxFlat" id="scrim"]
+bg_color = Color(0, 0, 0, 0.55)
+
+[sub_resource type="StyleBoxFlat" id="card"]
+bg_color = Color(0.086, 0.086, 0.173, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 0.85)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 20
+
+[sub_resource type="StyleBoxFlat" id="btn"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.110, 0.110, 0.220, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="btn_premium"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.262745, 0.380392, 0.933333, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.262745, 0.380392, 0.933333, 0.35)
+shadow_size = 10
+
+[sub_resource type="StyleBoxEmpty" id="btn_flat"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+
+[node name="Settings" type="CanvasLayer"]
+layer = 20
+script = ExtResource("1_set")
+
+[node name="Scrim" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_styles/panel = SubResource("scrim")
+
+[node name="Card" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -310.0
+offset_right = 180.0
+offset_bottom = 310.0
+theme_override_styles/panel = SubResource("card")
+
+[node name="TitleLabel" type="Label" parent="Card"]
+offset_left = 30.0
+offset_top = 26.0
+offset_right = 330.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="SoundBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 80.0
+offset_right = 320.0
+offset_bottom = 128.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "🔊  Sound: On"
+
+[node name="HapticsBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 138.0
+offset_right = 320.0
+offset_bottom = 186.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "📳  Haptics: On"
+
+[node name="TutorialBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 196.0
+offset_right = 320.0
+offset_bottom = 244.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "How to play"
+
+[node name="LeaderboardsBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 254.0
+offset_right = 320.0
+offset_bottom = 302.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "🏆  Leaderboards"
+
+[node name="PremiumBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 312.0
+offset_right = 320.0
+offset_bottom = 360.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_premium")
+theme_override_styles/hover = SubResource("btn_premium")
+theme_override_styles/pressed = SubResource("btn_premium")
+theme_override_styles/focus = SubResource("btn_premium")
+text = "Calm Forever  ·  $1.99"
+
+[node name="RestoreBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 368.0
+offset_right = 320.0
+offset_bottom = 396.0
+theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("btn_flat")
+theme_override_styles/hover = SubResource("btn_flat")
+theme_override_styles/pressed = SubResource("btn_flat")
+theme_override_styles/focus = SubResource("btn_flat")
+text = "Restore purchases"
+
+[node name="ResetBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 408.0
+offset_right = 320.0
+offset_bottom = 456.0
+theme_override_colors/font_color = Color(0.937, 0.267, 0.267, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "Reset Progress"
+
+[node name="CloseBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 514.0
+offset_right = 320.0
+offset_bottom = 562.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "Close"

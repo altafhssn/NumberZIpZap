@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://btljfxo8jhlnk"]
+
+[ext_resource type="Script" uid="uid://dsq0m27is2bae" path="res://scripts/Splash.gd" id="1_splash"]
+[ext_resource type="Texture2D" uid="uid://b2vs4d5jj18ea" path="res://assets/ui/publisher_logo.png" id="2_logo"]
+
+[sub_resource type="StyleBoxFlat" id="bg"]
+bg_color = Color(0, 0, 0, 1)
+
+[node name="Splash" type="Control" unique_id=365619941]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_splash")
+
+[node name="Bg" type="Panel" parent="." unique_id=764884728]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("bg")
+
+[node name="Logo" type="TextureRect" parent="." unique_id=329772038]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -180.0
+offset_right = 180.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5

@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ZipPath Play Preview</title>
+  <style>
+    :root {
+      --paper: #f4efe6;
+      --paper-2: #eaf1f2;
+      --ink: #28343b;
+      --muted: #5f6f73;
+      --sand: #ded3c3;
+      --tile: #ece4d8;
+      --pool: #f9f5ee;
+      --water-a: #3e8e8a;
+      --water-b: #e8b4b8;
+      --warm: #8a6942;
+      --soft-error: #9a665e;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(136, 201, 196, 0.18), transparent 34rem),
+        linear-gradient(180deg, var(--paper), var(--paper-2));
+      color: var(--ink);
+      font-family: Avenir, "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.38;
+      background-image:
+        radial-gradient(circle, rgba(69, 57, 42, 0.45) 0 1px, transparent 1px),
+        radial-gradient(circle, rgba(0, 104, 122, 0.35) 0 1px, transparent 1px);
+      background-position: 0 0, 14px 18px;
+      background-size: 49px 41px, 67px 53px;
+      mix-blend-mode: multiply;
+    }
+
+    .app {
+      width: min(100vw, 480px);
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: 22px 20px 20px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 14px;
+      position: relative;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title {
+      text-align: center;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .pool-label {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid rgba(121, 105, 82, 0.45);
+      background: rgba(249, 245, 238, 0.82);
+      color: var(--ink);
+      min-height: 42px;
+      border-radius: 10px;
+      padding: 0 14px;
+      font: inherit;
+      font-weight: 700;
+      box-shadow: 0 8px 22px rgba(72, 55, 36, 0.08);
+      cursor: pointer;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    .icon-button {
+      width: 44px;
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-size: 20px;
+    }
+
+    .status {
+      min-height: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .board-wrap {
+      display: grid;
+      align-items: center;
+      justify-items: center;
+      min-height: 0;
+    }
+
+    .board {
+      --size: min(86vw, 390px);
+      width: var(--size);
+      height: var(--size);
+      position: relative;
+      border-radius: 22px;
+      padding: 9px;
+      background: var(--pool);
+      box-shadow: 0 16px 34px rgba(72, 55, 36, 0.13);
+      touch-action: none;
+    }
+
+    .grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(var(--grid-size), 1fr);
+      grid-template-rows: repeat(var(--grid-size), 1fr);
+      gap: 6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .cell {
+      border-radius: 14px;
+      background: var(--tile);
+      position: relative;
+      display: grid;
+      place-items: center;
+      transition: background 160ms ease, transform 160ms ease;
+      min-width: 0;
+    }
+
+    .cell.filled {
+      background: color-mix(in srgb, var(--fill) 42%, white);
+    }
+
+    .cell.blocked {
+      background: #d7c9b8;
+      border: 1px solid #bca98f;
+    }
+
+    .cell.refuse {
+      animation: refuse 220ms ease;
+    }
+
+    @keyframes refuse {
+      0%, 100% { transform: scale(1); }
+      45% { transform: scale(0.92); }
+    }
+
+    .stone {
+      width: 70%;
+      aspect-ratio: 1;
+      border-radius: 999px;
+      background: #fbf7ee;
+      border: 3px solid var(--water-a);
+      color: var(--ink);
+      display: grid;
+      place-items: center;
+      font-size: clamp(20px, 7vw, 31px);
+      font-weight: 800;
+      box-shadow: 0 0 0 9px rgba(62, 142, 138, 0.12);
+      z-index: 5;
+    }
+
+    .cell.next .stone {
+      box-shadow: 0 0 0 12px rgba(62, 142, 138, 0.2);
+    }
+
+    svg.path {
+      position: absolute;
+      inset: 9px;
+      width: calc(100% - 18px);
+      height: calc(100% - 18px);
+      z-index: 3;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .water-soft {
+      fill: none;
+      stroke: var(--water-b);
+      stroke-width: 26;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.23;
+    }
+
+    .water-main {
+      fill: none;
+      stroke: url(#waterGradient);
+      stroke-width: 18;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.94;
+    }
+
+    .hint {
+      fill: none;
+      stroke: #8a6942;
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-dasharray: 6 8;
+      opacity: 0.45;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .complete {
+      position: absolute;
+      inset: auto 28px 116px;
+      background: rgba(249, 245, 238, 0.96);
+      border: 1px solid rgba(121, 105, 82, 0.36);
+      border-radius: 18px;
+      padding: 22px;
+      text-align: center;
+      box-shadow: 0 18px 42px rgba(72, 55, 36, 0.18);
+      z-index: 10;
+      display: none;
+    }
+
+    .complete.show {
+      display: block;
+      animation: bloom 360ms cubic-bezier(.2, .9, .25, 1.2);
+    }
+
+    @keyframes bloom {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .complete h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .complete p {
+      margin: 0 0 18px;
+      color: var(--warm);
+    }
+
+    @media (max-height: 700px) {
+      .app { gap: 8px; padding-top: 14px; }
+      h1 { font-size: 24px; }
+      .board { --size: min(82vw, 330px); }
+      button { min-height: 38px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <button class="icon-button" id="sound" title="Sound" aria-label="Toggle sound">♪</button>
+      <div class="title">
+        <h1>TIDE</h1>
+        <div class="pool-label" id="levelLabel">Dawn · Pool 1</div>
+      </div>
+      <button class="icon-button" id="restart" title="Reset" aria-label="Reset current pool">↺</button>
+    </header>
+
+    <div class="status" id="status">Begin at the first stone.</div>
+
+    <section class="board-wrap">
+      <div class="board" id="board" aria-label="ZipPath puzzle board">
+        <div class="grid" id="grid"></div>
+        <svg class="path" id="pathSvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="waterGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+              <stop offset="0%" stop-color="#3e8e8a" />
+              <stop offset="100%" stop-color="#e8b4b8" />
+            </linearGradient>
+          </defs>
+          <polyline class="hint" id="hintLine" points=""></polyline>
+          <polyline class="water-soft" id="softLine" points=""></polyline>
+          <polyline class="water-main" id="mainLine" points=""></polyline>
+        </svg>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button id="undo">Undo</button>
+      <button id="hint">Hint</button>
+      <button id="next">Next</button>
+      <button id="shuffle">New</button>
+    </div>
+
+    <div class="complete" id="complete">
+      <h2>The pool blooms.</h2>
+      <p id="petals">Petals 3 / 3</p>
+      <button id="continue">Next Pool</button>
+    </div>
+  </main>
+
+  <script>
+    const levels = [
+      {
+        name: "Dawn · Pool 1",
+        size: 5,
+        solution: [
+          [0,0],[0,1],[0,2],[0,3],[0,4],
+          [1,4],[1,3],[1,2],[1,1],[1,0],
+          [2,0],[2,1],[2,2],[2,3],[2,4],
+          [3,4],[3,3],[3,2],[3,1],[3,0],
+          [4,0],[4,1],[4,2],[4,3],[4,4],
+        ],
+        dots: [0, 7, 12, 18, 24],
+        blocked: [],
+      },
+      {
+        name: "Day · Pool 2",
+        size: 5,
+        solution: [
+          [0,0],[1,0],[2,0],[3,0],[4,0],
+          [4,1],[3,1],[2,1],[1,1],[0,1],
+          [0,2],[1,2],[2,2],[3,2],[4,2],
+          [4,3],[3,3],[2,3],[1,3],[0,3],
+          [0,4],[1,4],[2,4],[3,4],[4,4],
+        ],
+        dots: [0, 6, 12, 17, 24],
+        blocked: [],
+      },
+      {
+        name: "Dusk · Pool 3",
+        size: 6,
+        solution: [
+          [0,0],[0,1],[0,2],[0,3],[0,4],[0,5],
+          [1,5],[1,4],[1,3],[1,2],[1,1],[1,0],
+          [2,0],[2,1],[2,2],[2,3],[2,4],[2,5],
+          [3,5],[3,4],[3,3],[3,2],[3,1],[3,0],
+          [4,0],[4,1],[4,2],[4,3],[4,4],[4,5],
+          [5,5],[5,4],[5,3],[5,2],[5,1],[5,0],
+        ],
+        dots: [0, 8, 15, 22, 29, 35],
+        blocked: [],
+      },
+    ];
+
+    let levelIndex = 0;
+    let state;
+    let audioCtx = null;
+    let soundOn = true;
+    let dragging = false;
+    let hintUntil = 0;
+
+    const gridEl = document.getElementById("grid");
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const levelLabelEl = document.getElementById("levelLabel");
+    const softLine = document.getElementById("softLine");
+    const mainLine = document.getElementById("mainLine");
+    const hintLine = document.getElementById("hintLine");
+    const completeEl = document.getElementById("complete");
+    const petalsEl = document.getElementById("petals");
+
+    const noteScale = [293.66, 329.63, 392, 440, 493.88, 587.33, 659.25, 783.99];
+
+    function key(r, c) { return `${r},${c}`; }
+    function level() { return levels[levelIndex % levels.length]; }
+
+    function dotMap(lvl) {
+      const map = new Map();
+      lvl.dots.forEach((idx, i) => map.set(key(...lvl.solution[idx]), i + 1));
+      return map;
+    }
+
+    function startLevel() {
+      const lvl = level();
+      state = {
+        path: [],
+        visited: new Set(),
+        nextDot: 1,
+        complete: false,
+        hints: 0,
+        dots: dotMap(lvl),
+        blocked: new Set(lvl.blocked.map(([r, c]) => key(r, c))),
+      };
+      completeEl.classList.remove("show");
+      levelLabelEl.textContent = lvl.name;
+      statusEl.textContent = "Begin at the first stone.";
+      gridEl.style.setProperty("--grid-size", lvl.size);
+      buildGrid();
+      draw();
+    }
+
+    function buildGrid() {
+      const lvl = level();
+      gridEl.innerHTML = "";
+      for (let r = 0; r < lvl.size; r++) {
+        for (let c = 0; c < lvl.size; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          const k = key(r, c);
+          if (state.blocked.has(k)) cell.classList.add("blocked");
+          const dot = state.dots.get(k);
+          if (dot) {
+            const stone = document.createElement("div");
+            stone.className = "stone";
+            stone.textContent = dot;
+            cell.appendChild(stone);
+          }
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function draw() {
+      const lvl = level();
+      const totalCells = lvl.size * lvl.size - state.blocked.size;
+      for (const cell of gridEl.children) {
+        const r = Number(cell.dataset.r);
+        const c = Number(cell.dataset.c);
+        const k = key(r, c);
+        const idx = state.path.findIndex(([pr, pc]) => pr === r && pc === c);
+        const dot = state.dots.get(k);
+        cell.classList.toggle("filled", idx >= 0);
+        cell.classList.toggle("next", dot === state.nextDot);
+        if (idx >= 0) {
+          const t = idx / Math.max(1, totalCells - 1);
+          cell.style.setProperty("--fill", mixColor("#3e8e8a", "#e8b4b8", t));
+        }
+      }
+      const points = state.path.map(([r, c]) => pointFor(r, c)).join(" ");
+      softLine.setAttribute("points", points);
+      mainLine.setAttribute("points", points);
+
+      const hintPoints = Date.now() < hintUntil ? nextHintPoints() : "";
+      hintLine.setAttribute("points", hintPoints);
+    }
+
+    function pointFor(r, c) {
+      const s = level().size;
+      const step = 100 / s;
+      return `${(c + 0.5) * step},${(r + 0.5) * step}`;
+    }
+
+    function nextHintPoints() {
+      if (!state.path.length) return "";
+      const sol = level().solution;
+      const last = state.path[state.path.length - 1];
+      const i = sol.findIndex(([r, c]) => r === last[0] && c === last[1]);
+      if (i < 0 || i >= sol.length - 1) return "";
+      const end = Math.min(sol.length, i + 5);
+      return sol.slice(i, end).map(([r, c]) => pointFor(r, c)).join(" ");
+    }
+
+    function handleCell(r, c) {
+      if (state.complete) return;
+      const k = key(r, c);
+      if (state.blocked.has(k)) return refuse(r, c, "That stone bank is closed.");
+      if (!state.path.length) {
+        if (state.dots.get(k) !== 1) return refuse(r, c, "Begin at the first stone.");
+        place(r, c, true);
+        statusEl.textContent = "Trace gently to the next stone.";
+        return;
+      }
+      const existing = state.path.findIndex(([pr, pc]) => pr === r && pc === c);
+      if (existing >= 0) {
+        rewind(existing);
+        return;
+      }
+      const last = state.path[state.path.length - 1];
+      if (Math.abs(last[0] - r) + Math.abs(last[1] - c) !== 1) {
+        return refuse(r, c, "The water moves one tile at a time.");
+      }
+      const dot = state.dots.get(k);
+      if (dot && dot !== state.nextDot) {
+        return refuse(r, c, `Visit stone ${state.nextDot} first.`);
+      }
+      place(r, c, Boolean(dot));
+      checkComplete();
+    }
+
+    function place(r, c, reachedStone) {
+      state.path.push([r, c]);
+      state.visited.add(key(r, c));
+      if (reachedStone) {
+        state.nextDot++;
+        playNote(state.path.length + 2, 0.18);
+        rippleStatus(`Stone ${state.nextDot - 1} wakes.`);
+      } else {
+        playNote(state.path.length, 0.11);
+      }
+      draw();
+    }
+
+    function rewind(index) {
+      state.path = state.path.slice(0, index + 1);
+      state.visited = new Set(state.path.map(([r, c]) => key(r, c)));
+      state.nextDot = 1;
+      for (const [r, c] of state.path) {
+        if (state.dots.get(key(r, c)) === state.nextDot) state.nextDot++;
+      }
+      playNote(Math.max(0, state.path.length - 1), 0.08, true);
+      statusEl.textContent = state.nextDot > level().dots.length ? "Let the tide fill the pool." : `Find stone ${state.nextDot}.`;
+      draw();
+    }
+
+    function checkComplete() {
+      const lvl = level();
+      const totalCells = lvl.size * lvl.size - state.blocked.size;
+      if (state.path.length < totalCells) {
+        if (state.nextDot > lvl.dots.length) statusEl.textContent = "Every stone is awake. Let the tide fill the pool.";
+        else statusEl.textContent = `Find stone ${state.nextDot}.`;
+        return;
+      }
+      const last = state.path[state.path.length - 1];
+      const final = lvl.solution[lvl.solution.length - 1];
+      if (state.nextDot > lvl.dots.length && last[0] === final[0] && last[1] === final[1]) {
+        state.complete = true;
+        playWin();
+        petalsEl.textContent = `Petals ${state.hints === 0 ? 3 : state.hints === 1 ? 2 : 1} / 3`;
+        statusEl.textContent = "The pool blooms.";
+        completeEl.classList.add("show");
+      } else {
+        refuse(last[0], last[1], "The tide should rest on the last stone.");
+      }
+    }
+
+    function refuse(r, c, message) {
+      const cell = cellAt(r, c);
+      if (cell) {
+        cell.classList.remove("refuse");
+        void cell.offsetWidth;
+        cell.classList.add("refuse");
+      }
+      statusEl.textContent = message;
+      playRefuse();
+    }
+
+    function rippleStatus(message) {
+      statusEl.textContent = message;
+      setTimeout(() => {
+        if (!state.complete) statusEl.textContent = state.nextDot > level().dots.length ? "Let the tide fill the pool." : `Find stone ${state.nextDot}.`;
+      }, 620);
+    }
+
+    function cellAt(r, c) {
+      return gridEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+    }
+
+    function elementToCell(x, y) {
+      const el = document.elementFromPoint(x, y);
+      const cell = el && el.closest ? el.closest(".cell") : null;
+      if (!cell || !boardEl.contains(cell)) return null;
+      return [Number(cell.dataset.r), Number(cell.dataset.c)];
+    }
+
+    function mixColor(a, b, t) {
+      const pa = parseInt(a.slice(1), 16);
+      const pb = parseInt(b.slice(1), 16);
+      const ar = (pa >> 16) & 255, ag = (pa >> 8) & 255, ab = pa & 255;
+      const br = (pb >> 16) & 255, bg = (pb >> 8) & 255, bb = pb & 255;
+      const r = Math.round(ar + (br - ar) * t);
+      const g = Math.round(ag + (bg - ag) * t);
+      const bl = Math.round(ab + (bb - ab) * t);
+      return `rgb(${r}, ${g}, ${bl})`;
+    }
+
+    function ensureAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    }
+
+    function playNote(i, dur = 0.1, down = false) {
+      if (!soundOn) return;
+      ensureAudio();
+      const idx = Math.abs(i) % noteScale.length;
+      const freq = down ? noteScale[noteScale.length - 1 - idx] : noteScale[idx];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12, audioCtx.currentTime + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur + 0.02);
+    }
+
+    function playRefuse() {
+      if (!soundOn) return;
+      ensureAudio();
+      playNote(1, 0.06, true);
+    }
+
+    function playWin() {
+      [0, 2, 4, 5, 7].forEach((n, i) => setTimeout(() => playNote(n, 0.22), i * 125));
+    }
+
+    boardEl.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      ensureAudio();
+      const cell = elementToCell(e.clientX, e.clientY);
+      if (cell) handleCell(cell[0], cell[1]);
+    });
+
+    window.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      const cell = elementToCell(e.clientX, e.clientY);
+      if (!cell) return;
+      const last = state.path[state.path.length - 1];
+      if (!last || last[0] !== cell[0] || last[1] !== cell[1]) handleCell(cell[0], cell[1]);
+    });
+
+    window.addEventListener("pointerup", () => dragging = false);
+    window.addEventListener("pointercancel", () => dragging = false);
+
+    document.getElementById("restart").addEventListener("click", startLevel);
+    document.getElementById("undo").addEventListener("click", () => {
+      if (state.path.length > 1) rewind(state.path.length - 2);
+    });
+    document.getElementById("hint").addEventListener("click", () => {
+      state.hints++;
+      hintUntil = Date.now() + 2200;
+      statusEl.textContent = "A faint current appears.";
+      draw();
+      setTimeout(draw, 2300);
+    });
+    document.getElementById("next").addEventListener("click", () => {
+      levelIndex++;
+      startLevel();
+    });
+    document.getElementById("continue").addEventListener("click", () => {
+      levelIndex++;
+      startLevel();
+    });
+    document.getElementById("shuffle").addEventListener("click", () => {
+      levelIndex = (levelIndex + 1) % levels.length;
+      startLevel();
+    });
+    document.getElementById("sound").addEventListener("click", (e) => {
+      soundOn = !soundOn;
+      e.currentTarget.textContent = soundOn ? "♪" : "×";
+    });
+
+    startLevel();
+  </script>
+</body>
+</html>

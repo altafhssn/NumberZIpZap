@@ -1,0 +1,155 @@
+[gd_scene load_steps=8 format=3 uid="uid://b0box00zip001"]
+
+[ext_resource type="Script" path="res://scripts/Backdrop.gd" id="1_bd"]
+[ext_resource type="Script" path="res://scripts/BoxSelect.gd" id="2_bs"]
+[ext_resource type="Script" path="res://scripts/TouchScroll.gd" id="3_ts"]
+
+[sub_resource type="StyleBoxFlat" id="nav"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.117647, 0.117647, 0.227451, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.262745, 0.262745, 0.439216, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="bar_bg"]
+bg_color = Color(0.117647, 0.117647, 0.227451, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.18, 0.18, 0.32, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="bar_fg"]
+bg_color = Color(1, 0.82, 0.4, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="stat_chip"]
+content_margin_left = 22.0
+content_margin_right = 22.0
+content_margin_top = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.04, 0.04, 0.09, 0.6)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 0.7)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+
+[sub_resource type="StyleBoxEmpty" id="empty"]
+
+[node name="BoxSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2_bs")
+
+[node name="Backdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_bd")
+
+[node name="BackBtn" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 26.0
+offset_right = 96.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "‹ Back"
+
+[node name="TitleLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 70.0
+offset_right = 200.0
+offset_bottom = 108.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+theme_override_constants/font_letter_spacing = 3
+text = "LEVEL SELECT"
+horizontal_alignment = 1
+
+[node name="StatChip" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -130.0
+offset_top = 124.0
+offset_right = 130.0
+offset_bottom = 188.0
+theme_override_styles/panel = SubResource("stat_chip")
+
+[node name="TotalLabel" type="Label" parent="StatChip"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -120.0
+offset_top = 10.0
+offset_right = 120.0
+offset_bottom = 32.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "🌸 0 / 18"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="StatChip"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 40.0
+offset_right = 100.0
+offset_bottom = 52.0
+min_value = 0.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+theme_override_styles/background = SubResource("bar_bg")
+theme_override_styles/fill = SubResource("bar_fg")
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 210.0
+offset_right = 0.0
+offset_bottom = -20.0
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 0
+scroll_deadzone = 0
+theme_override_styles/panel = SubResource("empty")
+script = ExtResource("3_ts")
+scroll_horizontal_enabled = true
+scroll_vertical_enabled = false
+
+[node name="List" type="HBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20

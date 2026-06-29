@@ -1,0 +1,156 @@
+[gd_scene load_steps=4 format=3 uid="uid://b0lbd00zip001"]
+
+[ext_resource type="Script" path="res://scripts/Backdrop.gd" id="1_bd"]
+[ext_resource type="Script" path="res://scripts/LeaderboardScreen.gd" id="2_lbs"]
+[ext_resource type="Script" path="res://scripts/TouchScroll.gd" id="3_ts"]
+
+[sub_resource type="StyleBoxFlat" id="nav"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.117647, 0.117647, 0.227451, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.262745, 0.262745, 0.439216, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="LeaderboardScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("2_lbs")
+
+[node name="Backdrop" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_bd")
+
+[node name="BackBtn" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 26.0
+offset_right = 96.0
+offset_bottom = 66.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "‹ Back"
+
+[node name="TitleLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 28.0
+offset_right = 200.0
+offset_bottom = 60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_constants/font_letter_spacing = 3
+text = "LEADERBOARDS"
+horizontal_alignment = 1
+
+[node name="PrevBtn" type="Button" parent="."]
+offset_left = 20.0
+offset_top = 84.0
+offset_right = 64.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "‹"
+
+[node name="BoardIcon" type="TextureRect" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -78.0
+offset_top = 144.0
+offset_right = 78.0
+offset_bottom = 300.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BoardLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -160.0
+offset_top = 88.0
+offset_right = 160.0
+offset_bottom = 120.0
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "Daily Pond"
+horizontal_alignment = 1
+
+[node name="NextBtn" type="Button" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -64.0
+offset_top = 84.0
+offset_right = -20.0
+offset_bottom = 124.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "›"
+
+[node name="StatusLabel" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 312.0
+offset_right = 200.0
+offset_bottom = 340.0
+theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
+theme_override_font_sizes/font_size = 14
+text = "Loading..."
+horizontal_alignment = 1
+
+[node name="RefreshBtn" type="Button" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -64.0
+offset_top = 344.0
+offset_right = 64.0
+offset_bottom = 374.0
+theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("nav")
+theme_override_styles/hover = SubResource("nav")
+theme_override_styles/pressed = SubResource("nav")
+theme_override_styles/focus = SubResource("nav")
+text = "↻ Refresh"
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 386.0
+offset_right = -16.0
+offset_bottom = -20.0
+horizontal_scroll_mode = 0
+follow_focus = true
+script = ExtResource("3_ts")
+scroll_horizontal_enabled = false
+scroll_vertical_enabled = true
+
+[node name="List" type="VBoxContainer" parent="Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

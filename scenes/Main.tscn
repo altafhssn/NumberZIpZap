@@ -1,0 +1,310 @@
+[gd_scene load_steps=12 format=3 uid="uid://dclv3ds6pj3xw"]
+
+[ext_resource type="Script" path="res://scripts/Main.gd" id="1_06h2c"]
+[ext_resource type="Script" path="res://scripts/Grid.gd" id="2_yhxsb"]
+[ext_resource type="Script" path="res://scripts/HUD.gd" id="3_7kwsy"]
+
+[sub_resource type="StyleBoxFlat" id="btn_normal"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.086, 0.086, 0.173, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="btn_hover"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.110, 0.110, 0.220, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.42, 0.55, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="btn_pressed"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.165, 0.165, 0.306, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="hint_badge"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(1.0, 0.819, 0.4, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.043, 0.043, 0.086, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_accent"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.294118, 0.556863, 0.541176, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="btn_accent_hover"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(0.372549, 0.627451, 0.611765, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="bar_bg"]
+bg_color = Color(0.110, 0.110, 0.220, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="bar_fg"]
+bg_color = Color(0.294118, 0.556863, 0.541176, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="panel_complete"]
+bg_color = Color(0.086, 0.086, 0.173, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.165, 0.165, 0.306, 0.85)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 18
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_06h2c")
+
+[node name="Grid" type="Node2D" parent="."]
+script = ExtResource("2_yhxsb")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("3_7kwsy")
+
+[node name="LevelLabel" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 22.0
+offset_right = 460.0
+offset_bottom = 58.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/shadow_outline_size = 10
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.45)
+theme_override_font_sizes/font_size = 22
+text = "ZipPath"
+horizontal_alignment = 1
+
+[node name="FillBar" type="ProgressBar" parent="HUD"]
+offset_left = 110.0
+offset_top = 66.0
+offset_right = 370.0
+offset_bottom = 78.0
+min_value = 0.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+theme_override_styles/background = SubResource("bar_bg")
+theme_override_styles/fill = SubResource("bar_fg")
+
+[node name="FillLabel" type="Label" parent="HUD"]
+offset_left = 20.0
+offset_top = 82.0
+offset_right = 460.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
+theme_override_font_sizes/font_size = 12
+text = "Begin at the first stone."
+horizontal_alignment = 1
+
+[node name="PauseBtn" type="Button" parent="HUD"]
+offset_left = 20.0
+offset_top = 24.0
+offset_right = 64.0
+offset_bottom = 64.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "❚❚"
+
+[node name="ContinueBtn" type="Button" parent="HUD"]
+visible = false
+offset_left = 90.0
+offset_top = 596.0
+offset_right = 390.0
+offset_bottom = 644.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("btn_accent")
+theme_override_styles/hover = SubResource("btn_accent_hover")
+theme_override_styles/pressed = SubResource("btn_accent")
+theme_override_styles/focus = SubResource("btn_accent")
+text = "Try again"
+
+[node name="UndoBtn" type="Button" parent="HUD"]
+offset_left = 48.0
+offset_top = 660.0
+offset_right = 168.0
+offset_bottom = 708.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "Undo"
+
+[node name="ResetBtn" type="Button" parent="HUD"]
+offset_left = 180.0
+offset_top = 660.0
+offset_right = 300.0
+offset_bottom = 708.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "Reset"
+
+[node name="HintBtn" type="Button" parent="HUD"]
+offset_left = 312.0
+offset_top = 660.0
+offset_right = 432.0
+offset_bottom = 708.0
+theme_override_colors/font_color = Color(1.0, 0.819, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "Hint"
+
+[node name="HintCount" type="Label" parent="HUD"]
+offset_left = 410.0
+offset_top = 644.0
+offset_right = 446.0
+offset_bottom = 678.0
+theme_override_colors/font_color = Color(0.043, 0.043, 0.086, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("hint_badge")
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CompletePanel" type="Panel" parent="HUD"]
+visible = false
+offset_left = 40.0
+offset_top = 215.0
+offset_right = 440.0
+offset_bottom = 635.0
+theme_override_styles/panel = SubResource("panel_complete")
+
+[node name="StarsLabel" type="Label" parent="HUD/CompletePanel"]
+offset_left = 40.0
+offset_top = 70.0
+offset_right = 360.0
+offset_bottom = 170.0
+theme_override_colors/font_color = Color(1.0, 0.819, 0.4, 1)
+theme_override_font_sizes/font_size = 40
+text = ""
+horizontal_alignment = 1
+
+[node name="StatsLabel" type="Label" parent="HUD/CompletePanel"]
+offset_left = 40.0
+offset_top = 184.0
+offset_right = 360.0
+offset_bottom = 214.0
+theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
+theme_override_font_sizes/font_size = 14
+text = "The pool is still."
+horizontal_alignment = 1
+
+[node name="NextBtn" type="Button" parent="HUD/CompletePanel"]
+offset_left = 50.0
+offset_top = 238.0
+offset_right = 350.0
+offset_bottom = 286.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("btn_accent")
+theme_override_styles/hover = SubResource("btn_accent_hover")
+theme_override_styles/pressed = SubResource("btn_accent")
+theme_override_styles/focus = SubResource("btn_accent")
+text = "Next Pool"
+
+[node name="ReplayBtn" type="Button" parent="HUD/CompletePanel"]
+offset_left = 50.0
+offset_top = 296.0
+offset_right = 350.0
+offset_bottom = 344.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "Trace Again"
+
+[node name="HomeBtn" type="Button" parent="HUD/CompletePanel"]
+offset_left = 120.0
+offset_top = 364.0
+offset_right = 280.0
+offset_bottom = 402.0
+theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("btn_normal")
+theme_override_styles/hover = SubResource("btn_hover")
+theme_override_styles/pressed = SubResource("btn_pressed")
+theme_override_styles/focus = SubResource("btn_normal")
+text = "Home"

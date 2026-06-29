@@ -29,7 +29,7 @@ func _ready() -> void:
 func _connect_signals() -> void:
 	if GodotPlayGameServices.android_plugin:
 		GodotPlayGameServices.android_plugin.friendsLoaded.connect(func(friends_json: String):
-			var safe_array := GodotPlayGameServices.json_marshaller.safe_parse_array(friends_json)
+			var safe_array: Array[Dictionary] = GodotPlayGameServices.json_marshaller.safe_parse_array(friends_json)
 			var friends: Array[PlayGamesPlayer] = []
 			for dictionary: Dictionary in safe_array:
 				friends.append(PlayGamesPlayer.new(dictionary))
@@ -37,11 +37,11 @@ func _connect_signals() -> void:
 			friends_loaded.emit(friends)
 		)
 		GodotPlayGameServices.android_plugin.playerSearched.connect(func(friend_json: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(friend_json)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(friend_json)
 			player_searched.emit(PlayGamesPlayer.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.currentPlayerLoaded.connect(func(friend_json: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(friend_json)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(friend_json)
 			current_player_loaded.emit(PlayGamesPlayer.new(safe_dictionary))
 		)
 

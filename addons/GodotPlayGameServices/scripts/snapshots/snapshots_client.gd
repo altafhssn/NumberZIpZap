@@ -35,18 +35,18 @@ func _ready() -> void:
 				game_saved.emit(is_saved, save_data_name, save_data_description)
 		)
 		GodotPlayGameServices.android_plugin.gameLoaded.connect(func(json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			if safe_dictionary.is_empty():
 				game_loaded.emit(null)
 			else:
 				game_loaded.emit(PlayGamesSnapshot.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.conflictEmitted.connect(func(json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			conflict_emitted.emit(PlayGamesSnapshotConflict.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.snapshotsLoaded.connect(func(json_data: String):
-			var safe_array := GodotPlayGameServices.json_marshaller.safe_parse_array(json_data)
+			var safe_array: Array[Dictionary] = GodotPlayGameServices.json_marshaller.safe_parse_array(json_data)
 			var snapshots: Array[PlayGamesSnapshotMetadata] = []
 			for dictionary: Dictionary in safe_array:
 				snapshots.append(PlayGamesSnapshotMetadata.new(dictionary))

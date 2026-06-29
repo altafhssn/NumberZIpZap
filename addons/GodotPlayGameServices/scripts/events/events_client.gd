@@ -61,7 +61,7 @@ func _on_events_loadeds_by_ids(json_data: String) -> void:
 	events_loaded.emit(_parse_events(json_data))
 
 func _parse_events(json_data: String) -> Array[PlayGamesEvent]:
-	var safe_array := GodotPlayGameServices.json_marshaller.safe_parse_array(json_data)
+	var safe_array: Array[Dictionary] = GodotPlayGameServices.json_marshaller.safe_parse_array(json_data)
 	var events: Array[PlayGamesEvent] = []
 	for dictionary: Dictionary in safe_array:
 		events.append(PlayGamesEvent.new(dictionary))

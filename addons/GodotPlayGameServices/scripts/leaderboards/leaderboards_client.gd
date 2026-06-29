@@ -51,26 +51,26 @@ func _connect_signals() -> void:
 			score_submitted.emit(is_submitted, leaderboard_id)
 		)
 		GodotPlayGameServices.android_plugin.scoreLoaded.connect(func(leaderboard_id: String, json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			score_loaded.emit(leaderboard_id, PlayGamesLeaderboardScore.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.allLeaderboardsLoaded.connect(func(leaderboards_json: String):
-			var safe_array := GodotPlayGameServices.json_marshaller.safe_parse_array(leaderboards_json)
+			var safe_array: Array[Dictionary] = GodotPlayGameServices.json_marshaller.safe_parse_array(leaderboards_json)
 			var leaderboards: Array[PlayGamesLeaderboard] = []
 			for dictionary: Dictionary in safe_array:
 				leaderboards.append(PlayGamesLeaderboard.new(dictionary))
 			all_leaderboards_loaded.emit(leaderboards)
 		)
 		GodotPlayGameServices.android_plugin.leaderboardLoaded.connect(func(json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			leaderboard_loaded.emit(PlayGamesLeaderboard.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.playerCenteredScoresLoaded.connect(func(leaderboard_id: String, json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			player_centered_scores_loaded.emit(leaderboard_id, PlayGamesLeaderboardScores.new(safe_dictionary))
 		)
 		GodotPlayGameServices.android_plugin.topScoresLoaded.connect(func(leaderboard_id: String, json_data: String):
-			var safe_dictionary := GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
+			var safe_dictionary: Dictionary = GodotPlayGameServices.json_marshaller.safe_parse_dictionary(json_data)
 			top_scores_loaded.emit(leaderboard_id, PlayGamesLeaderboardScores.new(safe_dictionary))
 		)
 

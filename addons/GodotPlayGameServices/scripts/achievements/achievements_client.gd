@@ -33,7 +33,7 @@ func _connect_signals() -> void:
 			achievement_unlocked.emit(is_unlocked, achievement_id)
 		)
 		GodotPlayGameServices.android_plugin.achievementsLoaded.connect(func(achievements_json: String):
-			var safe_array := GodotPlayGameServices.json_marshaller.safe_parse_array(achievements_json)
+			var safe_array: Array[Dictionary] = GodotPlayGameServices.json_marshaller.safe_parse_array(achievements_json)
 			var achievements: Array[PlayGamesAchievement] = []
 			for dictionary: Dictionary in safe_array:
 				achievements.append(PlayGamesAchievement.new(dictionary))

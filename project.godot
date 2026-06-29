@@ -25,7 +25,7 @@ Ui="*res://scripts/Ui.gd"
 Transition="*res://scripts/Transition.gd"
 Leaderboard="*res://scripts/Leaderboard.gd"
 IAP="*res://scripts/IAP.gd"
-GodotPlayGameServices="*uid://dluffg26o5c4n"
+GodotPlayGameServices="*res://addons/GodotPlayGameServices/scripts/autoloads/godot_play_game_services.gd"
 
 [display]
 

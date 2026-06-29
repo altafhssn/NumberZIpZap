@@ -120,21 +120,21 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          ASC_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           IOS_BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID }}
         run: |
           set -euo pipefail
           test -n "$ASC_KEY_ID"
           test -n "$ASC_ISSUER_ID"
-          test -n "$ASC_PRIVATE_KEY"
+          test -n "$ASC_PRIVATE_KEY_BASE64"
           test -n "$APPLE_TEAM_ID"
           test -n "$IOS_BUNDLE_ID"
 
           key_dir="$RUNNER_TEMP/private_keys"
           key_path="$key_dir/AuthKey_${ASC_KEY_ID}.p8"
           mkdir -p "$key_dir"
-          printf '%s' "$ASC_PRIVATE_KEY" > "$key_path"
+          printf '%s' "$ASC_PRIVATE_KEY_BASE64" | base64 --decode > "$key_path"
           chmod 600 "$key_path"
           echo "ASC_KEY_PATH=$key_path" >> "$GITHUB_ENV"
 

@@ -52,9 +52,9 @@ script = ExtResource("1_bd")
 
 [node name="BackBtn" type="Button" parent="."]
 offset_left = 20.0
-offset_top = 26.0
+offset_top = 58.0
 offset_right = 96.0
-offset_bottom = 66.0
+offset_bottom = 98.0
 theme_override_colors/font_color = Color(0.88, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("nav")
@@ -67,9 +67,9 @@ text = "‹ Back"
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -200.0
-offset_top = 70.0
+offset_top = 102.0
 offset_right = 200.0
-offset_bottom = 108.0
+offset_bottom = 140.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 28
 theme_override_constants/font_letter_spacing = 3
@@ -80,9 +80,9 @@ horizontal_alignment = 1
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -110.0
-offset_top = 124.0
+offset_top = 156.0
 offset_right = 110.0
-offset_bottom = 170.0
+offset_bottom = 202.0
 theme_override_styles/panel = SubResource("chip")
 
 [node name="DropsLabel" type="Label" parent="DropsChip"]
@@ -103,7 +103,7 @@ horizontal_alignment = 1
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 190.0
+offset_top = 222.0
 offset_right = -16.0
 offset_bottom = -20.0
 horizontal_scroll_mode = 0

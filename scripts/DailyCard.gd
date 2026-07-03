@@ -77,6 +77,7 @@ func _build():
 
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 12)
+	vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.add_child(vb)
 
 	vb.add_child(_label("Daily Pond", 26, Color("#FFFFFF"), 1))
@@ -133,6 +134,11 @@ func _label(text: String, size: int, color: Color, align: int) -> Label:
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
 	l.horizontal_alignment = align
+	# Stretch to fill the card width so horizontal_alignment actually centers
+	# the text within the panel, not just within the label's own text width.
+	# Without this, short labels ("Jul 2 · Dusk") sit left-flush in the VBox.
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
 func _spacer(h: int) -> Control:

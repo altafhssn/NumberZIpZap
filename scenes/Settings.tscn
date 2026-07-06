@@ -71,9 +71,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -180.0
-offset_top = -310.0
+offset_top = -330.0
 offset_right = 180.0
-offset_bottom = 310.0
+offset_bottom = 330.0
 theme_override_styles/panel = SubResource("card")
 
 [node name="TitleLabel" type="Label" parent="Card"]
@@ -166,9 +166,9 @@ text = "Restore purchases"
 
 [node name="ResetBtn" type="Button" parent="Card"]
 offset_left = 40.0
-offset_top = 408.0
+offset_top = 466.0
 offset_right = 320.0
-offset_bottom = 456.0
+offset_bottom = 514.0
 theme_override_colors/font_color = Color(0.937, 0.267, 0.267, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn")
@@ -177,11 +177,24 @@ theme_override_styles/pressed = SubResource("btn")
 theme_override_styles/focus = SubResource("btn")
 text = "Reset Progress"
 
+[node name="AccountBtn" type="Button" parent="Card"]
+offset_left = 40.0
+offset_top = 408.0
+offset_right = 320.0
+offset_bottom = 456.0
+theme_override_colors/font_color = Color(0.72, 0.82, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("btn")
+theme_override_styles/hover = SubResource("btn")
+theme_override_styles/pressed = SubResource("btn")
+theme_override_styles/focus = SubResource("btn")
+text = "Sign in with Google"
+
 [node name="PrivacyPolicyBtn" type="Button" parent="Card"]
 offset_left = 40.0
-offset_top = 466.0
+offset_top = 524.0
 offset_right = 320.0
-offset_bottom = 500.0
+offset_bottom = 558.0
 theme_override_colors/font_color = Color(0.62, 0.66, 0.86, 1)
 theme_override_font_sizes/font_size = 14
 theme_override_styles/normal = SubResource("btn_flat")
@@ -192,9 +205,9 @@ text = "Privacy Policy"
 
 [node name="CloseBtn" type="Button" parent="Card"]
 offset_left = 40.0
-offset_top = 514.0
+offset_top = 572.0
 offset_right = 320.0
-offset_bottom = 562.0
+offset_bottom = 620.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("btn")

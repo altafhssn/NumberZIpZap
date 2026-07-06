@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "347471418099",
+    "project_id": "zippath-b64fa",
+    "storage_bucket": "zippath-b64fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347471418099:android:5334f44864caebd068dd86",
+        "android_client_info": {
+          "package_name": "com.littletag.zipzap"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "347471418099-ka2lor4j70r5bm04ormp11jnis08irp2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.littletag.zipzap",
+            "certificate_hash": "078015facaeb9fc9f37c1922ab738c8dd098830f"
+          }
+        },
+        {
+          "client_id": "347471418099-qdse35upasj4fboitc14c8u5d42oh59n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.littletag.zipzap",
+            "certificate_hash": "f777d255fb11f1d3ae3cda37d983f047ef5d9634"
+          }
+        },
+        {
+          "client_id": "347471418099-61ssvpi5be405ollpnn9baf9oict0uod.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT9FkXtowQCU_zwYhrtBKW0MsKcAgyvvQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "347471418099-61ssvpi5be405ollpnn9baf9oict0uod.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

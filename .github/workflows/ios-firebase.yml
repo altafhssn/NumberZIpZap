@@ -1,0 +1,143 @@
+name: iOS Firebase build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-firebase-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.6.2
+  FIREBASE_IOS_PLUGIN_VERSION: 0.5.6
+  APPLE_RUNTIME_REVISION: 22a254b8866e5a75e234621b09da3d8a14f143a9
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Apple toolchain
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift --version
+
+      - name: Cache pinned build downloads
+        uses: actions/cache@v4
+        with:
+          path: .ci-cache
+          key: ios-firebase-${{ env.GODOT_VERSION }}-${{ env.FIREBASE_IOS_PLUGIN_VERSION }}-${{ env.APPLE_RUNTIME_REVISION }}
+
+      - name: Download and verify pinned artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-cache
+
+          download() {
+            local url="$1" path="$2" sha="$3"
+            if [[ ! -f "$path" ]]; then
+              curl --fail --location --retry 4 --output "$path" "$url"
+            fi
+            echo "$sha  $path" | shasum -a 256 --check
+          }
+
+          download \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_macos.universal.zip" \
+            ".ci-cache/godot-macos.zip" \
+            "666b2a64e4b5c59db0e4974605b888eb72eb7d4e60e870d2be6cc19727b50807"
+          download \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" \
+            ".ci-cache/godot-templates.tpz" \
+            "942366dc4e27e7686a99da4d3cfb1b8ae8d3eb9444f6d8217eef16245b599ef2"
+          download \
+            "https://github.com/SomniGameStudios/godot-firebase-ios/releases/download/${FIREBASE_IOS_PLUGIN_VERSION}/GodotFirebaseiOS-${FIREBASE_IOS_PLUGIN_VERSION}.zip" \
+            ".ci-cache/firebase-ios.zip" \
+            "90ebd6d9b34294ba5062bb3e029346e346e102fbb707cf3dd5dd13fdf74f4811"
+          download \
+            "https://github.com/migueldeicaza/GodotApplePlugins/releases/download/build-${APPLE_RUNTIME_REVISION}/GodotApplePlugins-addons-${APPLE_RUNTIME_REVISION}.zip" \
+            ".ci-cache/apple-runtime.zip" \
+            "d9daf99f75ad12d46ee879fd0c54d8b40539e3d2fd963b38f2d2e78f6fa11809"
+
+      - name: Install Godot and iOS export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .ci-tools /tmp/godot-templates
+          mkdir -p .ci-tools /tmp/godot-templates
+          ditto -x -k .ci-cache/godot-macos.zip .ci-tools
+          xattr -dr com.apple.quarantine .ci-tools/Godot.app
+          unzip -q .ci-cache/godot-templates.tpz -d /tmp/godot-templates
+          template_dir="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable"
+          rm -rf "$template_dir"
+          mkdir -p "$template_dir"
+          cp -R /tmp/godot-templates/templates/. "$template_dir/"
+
+      - name: Install matched Firebase iOS plugin and SwiftGodot runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          plist="$(mktemp)"
+          cp addons/GodotFirebaseiOS/GoogleService-Info.plist "$plist"
+          rm -rf addons/GodotFirebaseiOS addons/GodotApplePluginsRuntime /tmp/firebase-ios /tmp/apple-runtime
+          mkdir -p /tmp/firebase-ios /tmp/apple-runtime
+          ditto -x -k .ci-cache/firebase-ios.zip /tmp/firebase-ios
+          ditto -x -k .ci-cache/apple-runtime.zip /tmp/apple-runtime
+          cp -R /tmp/firebase-ios/addons/GodotFirebaseiOS addons/
+          cp -R /tmp/apple-runtime/dist/addons/GodotApplePluginsRuntime addons/
+          cp "$plist" addons/GodotFirebaseiOS/GoogleService-Info.plist
+          plutil -lint addons/GodotFirebaseiOS/GoogleService-Info.plist
+
+      - name: Prepare Godot project safely for iOS CI
+        run: python3 .github/scripts/prepare_ios_firebase.py
+
+      - name: Generate Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
+          godot=".ci-tools/Godot.app/Contents/MacOS/Godot"
+          "$godot" --headless --path . --editor --quit
+          rm -rf ios_build
+          mkdir -p ios_build
+          "$godot" --headless --path . --export-release "iOS" "$PWD/ios_build/ZipPath.xcodeproj"
+          test -f ios_build/ZipPath.xcodeproj/project.pbxproj
+          test -d ios_build/ZipPath/frameworks
+
+      - name: Apply linker settings through Swift XcodeProj
+        shell: bash
+        run: |
+          set -euo pipefail
+          swift run \
+            --package-path .github/tools/xcode_firebase_linker \
+            xcode_firebase_linker \
+            ios_build/ZipPath.xcodeproj \
+            ios_build/ZipPath/frameworks
+
+      - name: Compile unsigned iOS Simulator build
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios_build/ZipPath.xcodeproj \
+            -scheme ZipPath \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build | tee ios_build/xcodebuild.log
+
+      - name: Upload generated Xcode project
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZipPath-iOS-Firebase-Xcode
+          path: ios_build
+          retention-days: 7
+          if-no-files-found: error

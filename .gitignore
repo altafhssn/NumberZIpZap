@@ -2,9 +2,14 @@
 .godot/
 
 # Exported builds
-Build/
+/Build/
 builds/
 ios_build/
+
+# iOS Firebase native artifacts are downloaded by the macOS GitHub workflow.
+addons/GodotFirebaseiOS/*
+!addons/GodotFirebaseiOS/GoogleService-Info.plist
+addons/GodotApplePluginsRuntime/
 
 # Android generated files and local machine configuration
 android/build/.gradle/
@@ -15,6 +20,12 @@ android/build/libs/release/
 android/build/local.properties
 android/build/assetPackInstallTime/build/
 android/build/assetPackInstallTime/src/main/assets/
+android/build/res/
+android/build/src/main/assets/
+android/build/src/debug/AndroidManifest.xml
+android/build/src/release/AndroidManifest.xml
+android/build/src/androidTestInstrumented/
+android/build/src/instrumented/
 
 # Signing keys and Apple credentials
 *.keystore
@@ -25,6 +36,9 @@ android/build/assetPackInstallTime/src/main/assets/
 AuthKey_*.p8
 export_credentials.cfg
 
+# Firebase CLI diagnostics
+firebase-debug.log
+
 # Editor and operating-system files
 .agents/
 .vscode/
@@ -32,4 +46,3 @@ export_credentials.cfg
 .DS_Store
 Thumbs.db
 desktop.ini
-

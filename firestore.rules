@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: Firebase Authentication uid
+    // Fields (all required):
+    //   uid: string, immutable, must equal the document ID and auth uid
+    //   display_name: string, 0..100 characters
+    //   email: string, 3..254 characters, must equal the auth token email
+    //   photo_url: string, empty or HTTPS URL, max 2048 characters
+    //   updated_at_unix: int, Unix seconds in the supported 1970..2100 range
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function uidUnchanged(userId) {
+      return request.resource.data.uid == userId &&
+        request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return request.resource.data.uid == resource.data.uid;
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.size() >= 3 &&
+        email.size() <= 254 &&
+        request.auth.token.email is string &&
+        email == request.auth.token.email;
+    }
+
+    function isValidPhotoUrl(url) {
+      return url is string &&
+        url.size() <= 2048 &&
+        (url.size() == 0 || url.matches('^https://[^\\s]+$'));
+    }
+
+    function isValidUser(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'display_name', 'email', 'photo_url', 'updated_at_unix'
+        ]) &&
+        data.keys().hasOnly([
+          'uid', 'display_name', 'email', 'photo_url', 'updated_at_unix'
+        ]) &&
+        data.uid is string &&
+        data.uid.size() >= 1 &&
+        data.uid.size() <= 128 &&
+        uidUnchanged(userId) &&
+        data.display_name is string &&
+        data.display_name.size() <= 100 &&
+        isValidEmail(data.email) &&
+        isValidPhotoUrl(data.photo_url) &&
+        data.updated_at_unix is int &&
+        data.updated_at_unix >= 0 &&
+        data.updated_at_unix <= 4102444800;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data, userId);
+      allow update: if isOwner(userId) &&
+        uidNotModified() &&
+        isValidUser(request.resource.data, userId);
+      allow delete: if isOwner(userId);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

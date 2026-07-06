@@ -4,6 +4,8 @@ extends CanvasLayer
 
 signal closed
 
+const PRIVACY_POLICY_URL := "https://altafhssn.github.io/NumberZIpZap/zippath_privacy.html"
+
 @onready var sound_btn: Button = $Card/SoundBtn
 @onready var haptics_btn: Button = $Card/HapticsBtn
 @onready var tutorial_btn: Button = $Card/TutorialBtn
@@ -11,6 +13,7 @@ signal closed
 @onready var premium_btn: Button = $Card/PremiumBtn
 @onready var restore_btn: Button = $Card/RestoreBtn
 @onready var reset_btn: Button = $Card/ResetBtn
+@onready var privacy_policy_btn: Button = $Card/PrivacyPolicyBtn
 @onready var close_btn: Button = $Card/CloseBtn
 
 var _confirm_reset := false
@@ -26,6 +29,7 @@ func _ready():
 	premium_btn.pressed.connect(_on_premium)
 	restore_btn.pressed.connect(_on_restore)
 	reset_btn.pressed.connect(_on_reset)
+	privacy_policy_btn.pressed.connect(_on_privacy_policy)
 	close_btn.pressed.connect(_on_close)
 	_refresh_premium()
 	IAP.purchase_completed.connect(_on_purchase_completed)
@@ -100,6 +104,11 @@ func _on_reset():
 	GameData.reset_progress()
 	_confirm_reset = false
 	reset_btn.text = "Progress reset"
+
+func _on_privacy_policy():
+	var error := OS.shell_open(PRIVACY_POLICY_URL)
+	if error != OK:
+		push_warning("Could not open Privacy Policy: %s" % error_string(error))
 
 func _on_close():
 	closed.emit()

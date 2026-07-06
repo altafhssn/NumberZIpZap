@@ -136,6 +136,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          set +e
           xcodebuild \
             -project ios_build/ZipPath.xcodeproj \
             -scheme ZipPath \
@@ -144,8 +145,24 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build | tee ios_build/xcodebuild.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [[ "$status" -ne 0 ]]; then
+            errors="$(grep -E '(^|[[:space:]])(fatal )?error:|Undefined symbols|ld: ' ios_build/xcodebuild.log | tail -n 50 || true)"
+            {
+              echo "## Xcode compiler errors"
+              echo '```text'
+              printf '%s\n' "$errors"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            while IFS= read -r line; do
+              [[ -n "$line" ]] && echo "::error::$line"
+            done <<< "$errors"
+            exit "$status"
+          fi
 
       - name: Upload generated Xcode project
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ZipPath-iOS-Firebase-Xcode
